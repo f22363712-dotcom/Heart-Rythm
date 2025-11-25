@@ -1,0 +1,132 @@
+{
+  "couples": {
+    "couple001": {
+      "couple_id": "couple001",
+      "names": [
+        "小明",
+        "小红"
+      ],
+      "points": 200,
+      "history": [
+        {
+          "timestamp": "2025-11-12T20:46:58.383685",
+          "points_change": 50,
+          "reason": "完成每日任务",
+          "new_balance": 50
+        },
+        {
+          "timestamp": "2025-11-12T20:48:00.017809",
+          "points_change": 50,
+          "reason": "完成每日任务",
+          "new_balance": 100
+        },
+        {
+          "timestamp": "2025-11-12T20:48:04.656926",
+          "points_change": 50,
+          "reason": "完成每日任务",
+          "new_balance": 150
+        },
+        {
+          "timestamp": "2025-11-12T20:48:05.718829",
+          "points_change": 50,
+          "reason": "完成每日任务",
+          "new_balance": 200
+        }
+      ],
+      "created_time": "2025-11-12T20:46:58.365442"
+    },
+    "001": {
+      "couple_id": "001",
+      "names": [
+        "小明",
+        "小红"
+      ],
+      "points": 50,
+      "history": [
+        {
+          "timestamp": "2025-11-18T15:29:10.843216",
+          "points_change": 50,
+          "reason": "完成每日任务",
+          "new_balance": 50
+        }
+      ],
+      "created_time": "2025-11-18T15:29:10.836013"
+    },
+    "002": {
+      "couple_id": "002",
+      "names": [
+        "张三",
+        "李四"
+      ],
+      "points": 10,
+      "history": [
+        {
+          "timestamp": "2025-11-18T15:29:20.203708",
+          "points_change": 30,
+          "reason": "完成挑战任务",
+          "new_balance": 30
+        },
+        {
+          "timestamp": "2025-11-18T15:29:20.206919",
+          "points_change": -20,
+          "reason": "兑换小礼物",
+          "new_balance": 10
+        }
+      ],
+      "created_time": "2025-11-18T15:29:20.188361"
+    },
+    "003": {
+      "couple_id": "003",
+      "names": [
+        "王五",
+        "赵六"
+      ],
+      "points": 100,
+      "history": [
+        {
+          "timestamp": "2025-11-18T15:29:20.210171",
+          "points_change": 100,
+          "reason": "完成每周任务",
+          "new_balance": 100
+        }
+      ],
+      "created_time": "2025-11-18T15:29:20.192990"
+    }
+  },
+  "rewards": [
+    {
+      "reward_id": "reward001",
+      "name": "浪漫晚餐",
+      "points_needed": 100,
+      "stock": 5,
+      "description": "双人浪漫晚餐一次",
+      "created_time": "2025-11-12T20:46:58.365442"
+    },
+    {
+      "reward_id": "reward1",
+      "name": "浪漫晚餐",
+      "points_needed": 100,
+      "stock": 5,
+      "description": "",
+      "created_time": "2025-11-18T15:29:10.840138"
+    },
+    {
+      "reward_id": "reward2",
+      "name": "电影票",
+      "points_needed": 50,
+      "stock": 10,
+      "description": "双人电影票一张",
+      "created_time": "2025-11-18T15:29:20.196403"
+    },
+    {
+      "reward_id": "reward3",
+      "name": "周末旅行",
+      "points_needed": 200,
+      "stock": 2,
+      "description": "短途旅行一次",
+      "created_time": "2025-11-18T15:29:20.199955"
+    }
+  ],
+  "exchange_records": [],
+  "last_updated": "2025-11-18T15:29:20.210171"
+}
