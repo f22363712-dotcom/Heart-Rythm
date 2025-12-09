@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}首页{% endblock %}
+
+{% block content %}
+    <h2>欢迎使用心动积分项目</h2>
+    <p>这是一个专为情侣设计的积分管理系统，帮助情侣记录和管理彼此的积分，促进感情发展。</p>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>🧑‍🤝‍🧑 情侣数量</h3>
+            <div class="value">{{ stats.total_couples if stats else '0' }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>🎁 奖励数量</h3>
+            <div class="value">{{ stats.total_rewards if stats else '0' }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>⭐ 总积分</h3>
+            <div class="value">{{ stats.total_points if stats else '0' }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>🔄 兑换次数</h3>
+            <div class="value">{{ stats.total_exchanges if stats else '0' }}</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3>功能介绍</h3>
+        <div style="margin-top: 20px;">
+            <div style="margin-bottom: 15px;">
+                <h4>🧑‍🤝‍🧑 情侣管理</h4>
+                <p>添加和管理情侣信息，查看积分变动历史。</p>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <h4>🎁 奖励管理</h4>
+                <p>创建和管理奖励商品，设置兑换所需积分和库存。</p>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <h4>⭐ 积分变动</h4>
+                <p>记录情侣之间的积分变动，添加变动原因。</p>
+            </div>
+            <div>
+                <h4>📊 系统统计</h4>
+                <p>查看系统的整体统计信息，了解使用情况。</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3>快速操作</h3>
+        <div style="display: flex; gap: 20px; margin-top: 20px;">
+            <a href="/couples" class="btn">情侣管理</a>
+            <a href="/rewards" class="btn">奖励管理</a>
+            <a href="/points" class="btn">积分变动</a>
+            <a href="/stats" class="btn">系统统计</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // 页面加载时获取系统统计数据
+        fetch('/api/stats/')
+            .then(response => response.json())
+            .then(data => {
+                // 更新统计数据
+                document.querySelectorAll('.stat-card .value').forEach((card, index) => {
+                    const keys = ['total_couples', 'total_rewards', 'total_points', 'total_exchanges'];
+                    if (data[keys[index]] !== undefined) {
+                        card.textContent = data[keys[index]];
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('获取统计数据失败:', error);
+            });
+    </script>
+{% endblock %}

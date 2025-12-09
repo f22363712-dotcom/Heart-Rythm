@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}奖励管理{% endblock %}
+
+{% block content %}
+    <h2>🎁 奖励管理</h2>
+    
+    <div class="card">
+        <h3>添加新奖励</h3>
+        <form id="addRewardForm">
+            <div class="form-group">
+                <label for="rewardId">奖励ID</label>
+                <input type="text" id="rewardId" name="reward_id" required placeholder="例如：reward001">
+            </div>
+            <div class="form-group">
+                <label for="rewardName">奖励名称</label>
+                <input type="text" id="rewardName" name="name" required placeholder="奖励名称">
+            </div>
+            <div class="form-group">
+                <label for="pointsNeeded">所需积分</label>
+                <input type="number" id="pointsNeeded" name="points_needed" required placeholder="兑换所需积分" min="1">
+            </div>
+            <div class="form-group">
+                <label for="stock">库存</label>
+                <input type="number" id="stock" name="stock" required placeholder="奖励库存" min="0">
+            </div>
+            <div class="form-group">
+                <label for="description">描述</label>
+                <textarea id="description" name="description" placeholder="奖励描述" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn">添加奖励</button>
+        </form>
+        <div id="addRewardResult" style="margin-top: 15px;"></div>
+    </div>
+    
+    <div class="card">
+        <h3>积分变动</h3>
+        <form id="pointsChangeForm">
+            <div class="form-group">
+                <label for="changeCoupleId">情侣ID</label>
+                <input type="text" id="changeCoupleId" name="couple_id" required placeholder="输入情侣ID">
+            </div>
+            <div class="form-group">
+                <label for="pointsChange">积分变动</label>
+                <input type="number" id="pointsChange" name="points_change" required placeholder="正数增加，负数减少">
+            </div>
+            <div class="form-group">
+                <label for="reason">变动原因</label>
+                <input type="text" id="reason" name="reason" required placeholder="积分变动原因" maxlength="100">
+            </div>
+            <button type="submit" class="btn">提交积分变动</button>
+        </form>
+        <div id="pointsChangeResult" style="margin-top: 15px;"></div>
+    </div>
+    
+    <div class="card">
+        <h3>创建兑换记录</h3>
+        <form id="exchangeForm">
+            <div class="form-group">
+                <label for="exchangeCoupleId">情侣ID</label>
+                <input type="text" id="exchangeCoupleId" name="couple_id" required placeholder="输入情侣ID">
+            </div>
+            <div class="form-group">
+                <label for="exchangeRewardId">奖励ID</label>
+                <input type="text" id="exchangeRewardId" name="reward_id" required placeholder="输入奖励ID">
+            </div>
+            <div class="form-group">
+                <label for="pointsUsed">使用积分</label>
+                <input type="number" id="pointsUsed" name="points_used" required placeholder="使用的积分" min="1">
+            </div>
+            <button type="submit" class="btn">创建兑换记录</button>
+        </form>
+        <div id="exchangeResult" style="margin-top: 15px;"></div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // 添加奖励表单提交
+        document.getElementById('addRewardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const rewardData = {
+                reward_id: formData.get('reward_id'),
+                name: formData.get('name'),
+                points_needed: parseInt(formData.get('points_needed')),
+                stock: parseInt(formData.get('stock')),
+                description: formData.get('description')
+            };
+            
+            try {
+                const response = await fetch('/api/rewards/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(rewardData)
+                });
+                
+                const result = await response.json();
+                const addRewardResult = document.getElementById('addRewardResult');
+                
+                if (response.ok) {
+                    addRewardResult.innerHTML = `<div style="color: green;">✅ ${result.message}</div>`;
+                    e.target.reset();
+                } else {
+                    addRewardResult.innerHTML = `<div style="color: red;">❌ ${result.detail || result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('addRewardResult').innerHTML = `<div style="color: red;">❌ 服务器错误: ${error.message}</div>`;
+            }
+        });
+        
+        // 积分变动表单提交
+        document.getElementById('pointsChangeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const pointsData = {
+                couple_id: formData.get('couple_id'),
+                points_change: parseInt(formData.get('points_change')),
+                reason: formData.get('reason')
+            };
+            
+            try {
+                const response = await fetch('/api/points/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(pointsData)
+                });
+                
+                const result = await response.json();
+                const pointsChangeResult = document.getElementById('pointsChangeResult');
+                
+                if (response.ok) {
+                    pointsChangeResult.innerHTML = `<div style="color: green;">✅ ${result.message}，新积分: ${result.new_points}</div>`;
+                    e.target.reset();
+                } else {
+                    pointsChangeResult.innerHTML = `<div style="color: red;">❌ ${result.detail || result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('pointsChangeResult').innerHTML = `<div style="color: red;">❌ 服务器错误: ${error.message}</div>`;
+            }
+        });
+        
+        // 兑换记录表单提交
+        document.getElementById('exchangeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const exchangeData = {
+                couple_id: formData.get('couple_id'),
+                reward_id: formData.get('reward_id'),
+                points_used: parseInt(formData.get('points_used'))
+            };
+            
+            try {
+                const response = await fetch('/api/exchanges/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(exchangeData)
+                });
+                
+                const result = await response.json();
+                const exchangeResult = document.getElementById('exchangeResult');
+                
+                if (response.ok) {
+                    exchangeResult.innerHTML = `<div style="color: green;">✅ ${result.message}</div>`;
+                    e.target.reset();
+                } else {
+                    exchangeResult.innerHTML = `<div style="color: red;">❌ ${result.detail || result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('exchangeResult').innerHTML = `<div style="color: red;">❌ 服务器错误: ${error.message}</div>`;
+            }
+        });
+    </script>
+{% endblock %}

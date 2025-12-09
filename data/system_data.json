@@ -91,6 +91,35 @@
         }
       ],
       "created_time": "2025-11-18T15:29:20.192990"
+    },
+    "test001": {
+      "couple_id": "test001",
+      "names": [
+        "张三",
+        "李四"
+      ],
+      "points": 300,
+      "history": [
+        {
+          "timestamp": "2025-12-09T16:08:46.199501",
+          "points_change": 100,
+          "reason": "完成任务",
+          "new_balance": 100
+        },
+        {
+          "timestamp": "2025-12-09T17:24:49.696943",
+          "points_change": 100,
+          "reason": "完成任务",
+          "new_balance": 200
+        },
+        {
+          "timestamp": "2025-12-09T17:25:23.994153",
+          "points_change": 100,
+          "reason": "完成任务",
+          "new_balance": 300
+        }
+      ],
+      "created_time": "2025-12-09T16:08:45.538889"
     }
   },
   "rewards": [
@@ -127,6 +156,28 @@
       "created_time": "2025-11-18T15:29:20.199955"
     }
   ],
-  "exchange_records": [],
-  "last_updated": "2025-11-18T15:29:20.210171"
+  "exchange_records": [
+    {
+      "record_id": "EX20251209160845",
+      "couple_id": "test001",
+      "reward_id": "reward001",
+      "points_used": 50,
+      "exchange_time": "2025-12-09T16:08:45.570806"
+    },
+    {
+      "record_id": "EX20251209172449",
+      "couple_id": "test001",
+      "reward_id": "reward001",
+      "points_used": 50,
+      "exchange_time": "2025-12-09T17:24:49.593074"
+    },
+    {
+      "record_id": "EX20251209172523",
+      "couple_id": "test001",
+      "reward_id": "reward001",
+      "points_used": 50,
+      "exchange_time": "2025-12-09T17:25:23.890389"
+    }
+  ],
+  "last_updated": "2025-12-09T17:25:23.994187"
 }

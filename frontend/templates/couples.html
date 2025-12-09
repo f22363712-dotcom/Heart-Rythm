@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}情侣管理{% endblock %}
+
+{% block content %}
+    <h2>🧑‍🤝‍🧑 情侣管理</h2>
+    
+    <div class="card">
+        <h3>添加新情侣</h3>
+        <form id="addCoupleForm">
+            <div class="form-group">
+                <label for="coupleId">情侣ID</label>
+                <input type="text" id="coupleId" name="couple_id" required placeholder="例如：001">
+            </div>
+            <div class="form-group">
+                <label for="name1">姓名1</label>
+                <input type="text" id="name1" name="name1" required placeholder="第一个情侣的名字">
+            </div>
+            <div class="form-group">
+                <label for="name2">姓名2</label>
+                <input type="text" id="name2" name="name2" required placeholder="第二个情侣的名字">
+            </div>
+            <button type="submit" class="btn">添加情侣</button>
+        </form>
+        <div id="addResult" style="margin-top: 15px;"></div>
+    </div>
+    
+    <div class="card">
+        <h3>查询情侣信息</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <div class="form-group" style="flex: 1;">
+                <input type="text" id="queryCoupleId" placeholder="输入情侣ID查询" style="margin: 0;">
+            </div>
+            <button id="queryCoupleBtn" class="btn btn-secondary">查询</button>
+        </div>
+        <div id="coupleInfo"></div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // 添加情侣表单提交
+        document.getElementById('addCoupleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const coupleData = {
+                couple_id: formData.get('couple_id'),
+                name1: formData.get('name1'),
+                name2: formData.get('name2')
+            };
+            
+            try {
+                const response = await fetch('/api/couples/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(coupleData)
+                });
+                
+                const result = await response.json();
+                const addResult = document.getElementById('addResult');
+                
+                if (response.ok) {
+                    addResult.innerHTML = `<div style="color: green;">✅ ${result.message}</div>`;
+                    e.target.reset();
+                } else {
+                    addResult.innerHTML = `<div style="color: red;">❌ ${result.detail || result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('addResult').innerHTML = `<div style="color: red;">❌ 服务器错误: ${error.message}</div>`;
+            }
+        });
+        
+        // 查询情侣信息
+        document.getElementById('queryCoupleBtn').addEventListener('click', async () => {
+            const coupleId = document.getElementById('queryCoupleId').value.trim();
+            if (!coupleId) {
+                alert('请输入情侣ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/couples/${coupleId}/`);
+                const result = await response.json();
+                const coupleInfo = document.getElementById('coupleInfo');
+                
+                if (response.ok) {
+                    coupleInfo.innerHTML = `
+                        <div class="card">
+                            <h4>情侣信息</h4>
+                            <p><strong>情侣ID:</strong> ${result.couple_id}</p>
+                            <p><strong>姓名:</strong> ${result.names[0]} 和 ${result.names[1]}</p>
+                            <p><strong>积分:</strong> ${result.points}</p>
+                            <p><strong>创建时间:</strong> ${new Date(result.created_time).toLocaleString()}</p>
+                            <h5>积分变动历史:</h5>
+                            <ul style="margin-left: 20px;">
+                                ${result.history.map(history => `
+                                    <li>
+                                        ${new Date(history.timestamp).toLocaleString()}: 
+                                        ${history.points_change > 0 ? '+' : ''}${history.points_change} 积分
+                                        (${history.reason})
+                                        <br>新余额: ${history.new_balance}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    coupleInfo.innerHTML = `<div style="color: red;">❌ ${result.detail || result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('coupleInfo').innerHTML = `<div style="color: red;">❌ 服务器错误: ${error.message}</div>`;
+            }
+        });
+    </script>
+{% endblock %}
