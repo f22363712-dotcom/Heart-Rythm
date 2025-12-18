@@ -84,10 +84,10 @@ def start_both():
     print("=" * 50)
     print("💡 按 Ctrl+C 停止所有服务\n")
     
-    # 在后台线程启动后端
+    # 在后台线程启动后端，使用更可靠的启动方式
     backend_thread = threading.Thread(target=lambda: subprocess.run(
         [sys.executable, "-m", "uvicorn", "backend.api.main:app", 
-         "--host", "0.0.0.0", "--port", "8000"],
+         "--host", "0.0.0.0", "--port", "8000", "--reload"],
         cwd=os.path.dirname(os.path.abspath(__file__))
     ), daemon=True)
     backend_thread.start()
@@ -98,12 +98,26 @@ def start_both():
     import requests
     for _ in range(30):  # 最多等待30秒
         try:
-            response = requests.get("http://localhost:8000/health/", timeout=1)
+            # 同时尝试带斜杠和不带斜杠的URL，确保兼容性
+            response = requests.get("http://localhost:8000/health", timeout=2)
             if response.status_code == 200:
                 backend_ready = True
                 break
-        except:
+            # 尝试带斜杠的URL
+            response = requests.get("http://localhost:8000/health/", timeout=2)
+            if response.status_code == 200:
+                backend_ready = True
+                break
+            # 尝试使用stats端点作为备选健康检查
+            response = requests.get("http://localhost:8000/stats/", timeout=2)
+            if response.status_code == 200:
+                backend_ready = True
+                break
+        except requests.exceptions.ConnectionError:
+            # 连接错误，继续等待
             pass
+        except Exception as e:
+            print(f"\n⚠️  健康检查时发生异常: {e}")
         time.sleep(1)
         print(".", end="", flush=True)
     
@@ -116,9 +130,11 @@ def start_both():
     # 启动前端
     try:
         from frontend.main import app
-        app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False)
+        app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
     except KeyboardInterrupt:
         print("\n✅ 所有服务已停止")
+    except Exception as e:
+        print(f"\n❌ 启动前端失败: {e}")
 
 
 def run_example():
