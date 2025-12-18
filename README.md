@@ -2,6 +2,26 @@
 
 💕 专为情侣设计的积分管理系统，用爱记录每一刻
 
+## 环境要求
+
+- Python 3.8或更高版本
+
+## 获取项目
+
+### 从GitHub克隆（推荐）
+
+```bash
+git clone https://github.com/f22363712-dotcom/Heart-Rythm.git
+cd Heart-Rythm
+```
+
+### 或直接下载ZIP文件
+
+1. 访问GitHub仓库：https://github.com/f22363712-dotcom/Heart-Rythm
+2. 点击"Code"按钮，选择"Download ZIP"
+3. 解压下载的ZIP文件
+4. 进入解压后的目录
+
 ## 项目简介
 
 心动积分是一个基于Python的Web应用，帮助情侣记录和管理彼此的心动积分，通过积分兑换系统增加感情互动和乐趣。
