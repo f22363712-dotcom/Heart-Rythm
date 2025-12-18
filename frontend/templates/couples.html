@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}情侣管理{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <span>💑</span> 情侣管理
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+    <!-- 添加情侣表单 -->
+    <div class="card">
+        <h3>💕 添加新情侣</h3>
+        <form id="addCoupleForm">
+            <div class="form-group">
+                <label for="coupleId">情侣ID</label>
+                <input type="text" id="coupleId" name="couple_id" required placeholder="例如：couple001">
+            </div>
+            <div class="form-group">
+                <label for="name1">💁‍♂️ 姓名一</label>
+                <input type="text" id="name1" name="name1" required placeholder="第一个人的名字">
+            </div>
+            <div class="form-group">
+                <label for="name2">💁‍♀️ 姓名二</label>
+                <input type="text" id="name2" name="name2" required placeholder="第二个人的名字">
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">
+                💗 添加情侣
+            </button>
+        </form>
+        <div id="addResult"></div>
+    </div>
+
+    <!-- 查询情侣信息 -->
+    <div class="card">
+        <h3>🔍 查询情侣信息</h3>
+        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <input type="text" id="queryCoupleId" placeholder="输入情侣ID查询" style="flex: 1; padding: 14px 18px; border: 2px solid #f0e4e8; border-radius: 12px; font-size: 1rem;">
+            <button id="queryCoupleBtn" class="btn btn-secondary">查询</button>
+        </div>
+        <div id="coupleInfo"></div>
+    </div>
+</div>
+
+<!-- 情侣列表 -->
+<div class="card" style="margin-top: 24px;">
+    <h3>📋 情侣列表</h3>
+    <div class="data-list" id="couplesList">
+        {% if couples %}
+            {% for couple in couples %}
+            <div class="data-item">
+                <div class="info">
+                    <h4>{{ couple.names[0] }} 💕 {{ couple.names[1] }}</h4>
+                    <p>ID: {{ couple.couple_id }}</p>
+                </div>
+                <div class="points">{{ couple.points }} 积分</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--text-light);">
+                <div style="font-size: 3rem; margin-bottom: 16px;">💔</div>
+                <p>暂无情侣数据，快来添加第一对吧！</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 添加情侣表单提交
+    document.getElementById('addCoupleForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const coupleData = {
+            couple_id: formData.get('couple_id'),
+            name1: formData.get('name1'),
+            name2: formData.get('name2')
+        };
+        
+        try {
+            const response = await fetch('/api/couples/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(coupleData)
+            });
+            
+            const result = await response.json();
+            const addResult = document.getElementById('addResult');
+            
+            if (response.ok) {
+                addResult.innerHTML = `
+                    <div class="message message-success">
+                        ✅ ${result.message}
+                    </div>
+                `;
+                e.target.reset();
+                // 刷新页面显示新数据
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                addResult.innerHTML = `
+                    <div class="message message-error">
+                        ❌ ${result.detail || result.error || '添加失败'}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            document.getElementById('addResult').innerHTML = `
+                <div class="message message-error">
+                    ❌ 服务器错误: ${error.message}
+                </div>
+            `;
+        }
+    });
+    
+    // 查询情侣信息
+    document.getElementById('queryCoupleBtn').addEventListener('click', async () => {
+        const coupleId = document.getElementById('queryCoupleId').value.trim();
+        if (!coupleId) {
+            alert('请输入情侣ID');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/couples/${coupleId}/`);
+            const result = await response.json();
+            const coupleInfo = document.getElementById('coupleInfo');
+            
+            if (response.ok) {
+                let historyHtml = '';
+                if (result.history && result.history.length > 0) {
+                    historyHtml = result.history.slice(-5).reverse().map(h => `
+                        <div class="history-item">
+                            <div class="time">${new Date(h.timestamp).toLocaleString('zh-CN')}</div>
+                            <div>
+                                <span class="change ${h.points_change >= 0 ? 'positive' : 'negative'}">
+                                    ${h.points_change >= 0 ? '+' : ''}${h.points_change} 积分
+                                </span>
+                                - ${h.reason}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    historyHtml = '<p style="color: var(--text-light); text-align: center;">暂无积分变动记录</p>';
+                }
+                
+                coupleInfo.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #fff0f5, #ffe4ec); border-radius: 16px; padding: 24px; margin-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div>
+                                <h4 style="font-size: 1.3rem; color: var(--text-dark); margin-bottom: 8px;">
+                                    ${result.names[0]} 💕 ${result.names[1]}
+                                </h4>
+                                <p style="color: var(--text-light); font-size: 0.9rem;">ID: ${result.couple_id}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--primary-rose);">
+                                    ${result.points}
+                                </div>
+                                <div style="color: var(--text-light); font-size: 0.9rem;">当前积分</div>
+                            </div>
+                        </div>
+                        <h5 style="color: var(--text-dark); margin-bottom: 12px;">📜 最近记录</h5>
+                        ${historyHtml}
+                    </div>
+                `;
+            } else {
+                coupleInfo.innerHTML = `
+                    <div class="message message-error">
+                        ❌ ${result.detail || '未找到该情侣'}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            document.getElementById('coupleInfo').innerHTML = `
+                <div class="message message-error">
+                    ❌ 查询失败: ${error.message}
+                </div>
+            `;
+        }
+    });
+
+    // 回车键触发查询
+    document.getElementById('queryCoupleId').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('queryCoupleBtn').click();
+        }
+    });
+</script>
+{% endblock %}

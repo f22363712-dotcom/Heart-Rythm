@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}数据统计{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <span>📊</span> 数据统计
+</div>
+
+<!-- 系统状态 -->
+<div class="card" style="margin-bottom: 24px;">
+    <h3>🔌 系统状态</h3>
+    <div style="display: flex; align-items: center; gap: 12px; margin-top: 16px;">
+        <div id="statusIndicator" style="width: 12px; height: 12px; border-radius: 50%; background: #ffc107;"></div>
+        <span id="statusText" style="color: var(--text-light);">检查中...</span>
+    </div>
+</div>
+
+<!-- 统计数据 -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="icon">💑</div>
+        <h3>情侣数量</h3>
+        <div class="value" id="stat-couples">{{ stats.total_couples if stats else '0' }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">🎁</div>
+        <h3>奖励数量</h3>
+        <div class="value" id="stat-rewards">{{ stats.total_rewards if stats else '0' }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">⭐</div>
+        <h3>总积分</h3>
+        <div class="value" id="stat-points">{{ stats.total_points if stats else '0' }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">🔄</div>
+        <h3>兑换次数</h3>
+        <div class="value" id="stat-exchanges">{{ stats.total_exchanges if stats else '0' }}</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+    <!-- 刷新统计 -->
+    <div class="card">
+        <h3>🔄 刷新数据</h3>
+        <p style="color: var(--text-light); margin-bottom: 20px;">
+            点击下方按钮刷新统计数据
+        </p>
+        <button id="refreshStatsBtn" class="btn" style="width: 100%;">
+            📊 刷新统计
+        </button>
+        <div id="refreshResult"></div>
+        <div style="margin-top: 16px; padding: 16px; background: #f8f9fa; border-radius: 12px;">
+            <p style="font-size: 0.85rem; color: var(--text-light);">
+                <strong>最后更新:</strong> 
+                <span id="lastUpdate">{{ stats.last_updated if stats else '未知' }}</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- 备份管理 -->
+    <div class="card">
+        <h3>💾 备份管理</h3>
+        <p style="color: var(--text-light); margin-bottom: 20px;">
+            创建数据备份，保障数据安全
+        </p>
+        <button id="createBackupBtn" class="btn btn-secondary" style="width: 100%;">
+            💾 创建备份
+        </button>
+        <div id="backupResult"></div>
+        
+        <div style="margin-top: 20px;">
+            <h4 style="font-size: 1rem; color: var(--text-dark); margin-bottom: 12px;">📁 备份列表</h4>
+            <div id="backupsList" style="max-height: 200px; overflow-y: auto;">
+                <p style="color: var(--text-light); font-size: 0.9rem;">加载中...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- API信息 -->
+<div class="card" style="margin-top: 24px;">
+    <h3>🔗 API信息</h3>
+    <div style="display: grid; gap: 16px; margin-top: 16px;">
+        <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; font-family: monospace;">
+            <p style="margin-bottom: 8px; color: var(--text-light); font-size: 0.85rem;">后端API地址</p>
+            <code style="color: var(--primary-rose);">http://localhost:8000</code>
+        </div>
+        <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; font-family: monospace;">
+            <p style="margin-bottom: 8px; color: var(--text-light); font-size: 0.85rem;">API文档地址</p>
+            <a href="http://localhost:8000/docs" target="_blank" style="color: var(--primary-rose);">
+                http://localhost:8000/docs
+            </a>
+        </div>
+        <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; font-family: monospace;">
+            <p style="margin-bottom: 8px; color: var(--text-light); font-size: 0.85rem;">健康检查</p>
+            <a href="http://localhost:8000/health/" target="_blank" style="color: var(--primary-rose);">
+                http://localhost:8000/health/
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 检查后端状态
+    async function checkBackendStatus() {
+        const indicator = document.getElementById('statusIndicator');
+        const text = document.getElementById('statusText');
+        
+        try {
+            const response = await fetch('/api/health/', { timeout: 5000 });
+            if (response.ok) {
+                indicator.style.background = '#28a745';
+                text.textContent = '💚 后端服务运行正常';
+                text.style.color = '#28a745';
+            } else {
+                throw new Error('Backend error');
+            }
+        } catch (error) {
+            indicator.style.background = '#dc3545';
+            text.textContent = '💔 后端服务未连接，请启动后端';
+            text.style.color = '#dc3545';
+        }
+    }
+
+    // 刷新统计数据
+    document.getElementById('refreshStatsBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('refreshStatsBtn');
+        const result = document.getElementById('refreshResult');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> 加载中...';
+        
+        try {
+            const response = await fetch('/api/stats/');
+            const data = await response.json();
+            
+            if (response.ok) {
+                document.getElementById('stat-couples').textContent = data.total_couples || 0;
+                document.getElementById('stat-rewards').textContent = data.total_rewards || 0;
+                document.getElementById('stat-points').textContent = data.total_points || 0;
+                document.getElementById('stat-exchanges').textContent = data.total_exchanges || 0;
+                document.getElementById('lastUpdate').textContent = data.last_updated || '未知';
+                
+                result.innerHTML = '<div class="message message-success">✅ 统计数据已刷新</div>';
+            } else {
+                result.innerHTML = '<div class="message message-error">❌ 刷新失败</div>';
+            }
+        } catch (error) {
+            result.innerHTML = `<div class="message message-error">❌ 错误: ${error.message}</div>`;
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = '📊 刷新统计';
+    });
+
+    // 创建备份
+    document.getElementById('createBackupBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('createBackupBtn');
+        const result = document.getElementById('backupResult');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> 创建中...';
+        
+        try {
+            const response = await fetch('/api/backups/', { method: 'POST' });
+            const data = await response.json();
+            
+            if (response.ok) {
+                result.innerHTML = `<div class="message message-success">✅ ${data.message}</div>`;
+                loadBackupsList();
+            } else {
+                result.innerHTML = `<div class="message message-error">❌ ${data.detail || '备份失败'}</div>`;
+            }
+        } catch (error) {
+            result.innerHTML = `<div class="message message-error">❌ 错误: ${error.message}</div>`;
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = '💾 创建备份';
+    });
+
+    // 加载备份列表
+    async function loadBackupsList() {
+        const list = document.getElementById('backupsList');
+        
+        try {
+            const response = await fetch('/api/backups/');
+            const data = await response.json();
+            
+            if (response.ok && data.backups && data.backups.length > 0) {
+                list.innerHTML = data.backups.map(backup => {
+                    const filename = backup.split('/').pop();
+                    return `
+                        <div style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-light);">
+                            📄 ${filename}
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                list.innerHTML = '<p style="color: var(--text-light); font-size: 0.9rem;">暂无备份文件</p>';
+            }
+        } catch (error) {
+            list.innerHTML = '<p style="color: var(--text-light); font-size: 0.9rem;">无法加载备份列表</p>';
+        }
+    }
+
+    // 页面加载时执行
+    document.addEventListener('DOMContentLoaded', () => {
+        checkBackendStatus();
+        loadBackupsList();
+    });
+</script>
+{% endblock %}
