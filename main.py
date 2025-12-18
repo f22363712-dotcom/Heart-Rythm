@@ -52,7 +52,7 @@ def start_backend():
     try:
         import uvicorn
         from backend.api.main import app
-        uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+        uvicorn.run(app, host="0.0.0.0", port=8000)
     except KeyboardInterrupt:
         print("\n✅ 后端服务已停止")
     except Exception as e:
