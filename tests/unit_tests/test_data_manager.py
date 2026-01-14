@@ -119,8 +119,8 @@ class TestDataManager(unittest.TestCase):
         self.dm.add_reward("reward001", "电影票", 50, 10)
         self.dm.add_points_history("test001", 100, "完成任务")
         self.dm.add_points_history("test002", 200, "完成任务")
-        
-        stats = self.dm.get_system_stats()
+
+        stats = self.dm.get_stats()  # 修正方法名
         self.assertEqual(stats["total_couples"], 2)
         self.assertEqual(stats["total_rewards"], 1)
         self.assertEqual(stats["total_points"], 300)

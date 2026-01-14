@@ -1,23 +1,55 @@
 import unittest
 import tempfile
 import os
+import shutil
 from fastapi.testclient import TestClient
-from backend.api.main import app
+from backend.api.main import app, dm
 
 
 class TestAPI(unittest.TestCase):
     """API集成测试"""
-    
+
     def setUp(self):
-        """设置测试客户端"""
+        """设置测试客户端和临时数据目录"""
+        # 创建临时数据目录
+        self.temp_dir = tempfile.mkdtemp()
+
+        # 备份原始数据文件路径
+        self.original_data_dir = dm.data_dir
+        self.original_main_file = dm.main_file
+        self.original_backup_dir = dm.backup_dir
+
+        # 设置新的临时数据路径
+        dm.data_dir = self.temp_dir
+        dm.main_file = os.path.join(self.temp_dir, "system_data.json")
+        dm.backup_dir = os.path.join(self.temp_dir, "backups")
+        os.makedirs(dm.backup_dir, exist_ok=True)
+
+        # 清空内存中的数据
+        dm.couples = {}
+        dm.rewards = []
+        dm.exchange_records = []
+
+        # 创建测试客户端
         self.client = TestClient(app)
+
+    def tearDown(self):
+        """清理临时数据目录"""
+        # 恢复原始数据路径
+        dm.data_dir = self.original_data_dir
+        dm.main_file = self.original_main_file
+        dm.backup_dir = self.original_backup_dir
+
+        # 删除临时目录
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
         
     def test_create_couple(self):
         """测试创建情侣API"""
         response = self.client.post(
             "/couples/",
             json={
-                "couple_id": "test001",
+                "couple_id": "test_couple_001",  # 使用唯一ID避免冲突
                 "name1": "张三",
                 "name2": "李四"
             }
@@ -31,14 +63,14 @@ class TestAPI(unittest.TestCase):
         self.client.post(
             "/couples/",
             json={
-                "couple_id": "test001",
+                "couple_id": "test_couple_002",  # 使用唯一ID
                 "name1": "张三",
                 "name2": "李四"
             }
         )
-        
+
         # 然后获取情侣信息
-        response = self.client.get("/couples/test001/")
+        response = self.client.get("/couples/test_couple_002/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["names"], ["张三", "李四"])
     
@@ -52,7 +84,7 @@ class TestAPI(unittest.TestCase):
         response = self.client.post(
             "/rewards/",
             json={
-                "reward_id": "reward001",
+                "reward_id": "test_reward_001",  # 使用唯一ID
                 "name": "电影票",
                 "points_needed": 50,
                 "stock": 10,
@@ -68,17 +100,17 @@ class TestAPI(unittest.TestCase):
         self.client.post(
             "/couples/",
             json={
-                "couple_id": "test001",
+                "couple_id": "test_couple_003",  # 使用唯一ID
                 "name1": "张三",
                 "name2": "李四"
             }
         )
-        
+
         # 然后进行积分变动
         response = self.client.post(
             "/points/",
             json={
-                "couple_id": "test001",
+                "couple_id": "test_couple_003",
                 "points_change": 100,
                 "reason": "完成任务"
             }
@@ -93,28 +125,28 @@ class TestAPI(unittest.TestCase):
         self.client.post(
             "/couples/",
             json={
-                "couple_id": "test001",
+                "couple_id": "test_couple_004",  # 使用唯一ID
                 "name1": "张三",
                 "name2": "李四"
             }
         )
-        
+
         self.client.post(
             "/rewards/",
             json={
-                "reward_id": "reward001",
+                "reward_id": "test_reward_002",  # 使用唯一ID
                 "name": "电影票",
                 "points_needed": 50,
                 "stock": 10
             }
         )
-        
+
         # 然后创建兑换记录
         response = self.client.post(
             "/exchanges/",
             json={
-                "couple_id": "test001",
-                "reward_id": "reward001",
+                "couple_id": "test_couple_004",
+                "reward_id": "test_reward_002",
                 "points_used": 50
             }
         )
