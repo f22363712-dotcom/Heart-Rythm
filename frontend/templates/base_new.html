@@ -4,75 +4,318 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}心动积分系统{% endblock %}</title>
-    <!-- Bootstrap CSS -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
     <style>
+        /* ==================== 移植：原版核心变量 ==================== */
         :root {
+            /* 颜色提取自原版 */
             --primary-pink: #ff6b8a;
             --primary-rose: #e84a7f;
+            --accent-coral: #ff8a80;
+            --bg-cream: #fff9f5; /* 暖白背景 */
             --bg-gradient: linear-gradient(135deg, #fff9f5 0%, #fff0f3 50%, #ffe4ec 100%);
+
+            /* 玻璃质感变量 */
+            --card-bg: rgba(255, 255, 255, 0.75); /*稍微透明一点*/
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --shadow-soft: 0 8px 32px rgba(232, 74, 127, 0.1);
+            --shadow-hover: 0 12px 40px rgba(232, 74, 127, 0.2);
+            --radius-large: 20px;
+            --radius-pill: 50px;
         }
 
+        /* ==================== 全局基础重置 ==================== */
         body {
+            font-family: 'Noto Sans SC', sans-serif;
             background: var(--bg-gradient);
+            color: #4a3f55; /* 原版深紫色字体，比纯黑柔和 */
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
+        /* 标题字体 */
+        h1, h2, h3, h4, h5, .navbar-brand {
+            font-family: 'Ma Shan Zheng', cursive !important; /* 强制应用可爱字体 */
+        }
+
+        /* ==================== 氛围感：浮动爱心背景 (移植) ==================== */
+        .floating-hearts {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: -1; /* 放在最底层 */
+            overflow: hidden;
+        }
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.15;
+            animation: float-up 15s infinite ease-in-out;
+            color: var(--primary-pink);
+        }
+        .heart:nth-child(1) { left: 5%; animation-delay: 0s; font-size: 20px; }
+        .heart:nth-child(2) { left: 15%; animation-delay: 2s; font-size: 28px; }
+        .heart:nth-child(3) { left: 50%; animation-delay: 1s; font-size: 32px; }
+        .heart:nth-child(4) { left: 85%; animation-delay: 5s; font-size: 26px; }
+
+        @keyframes float-up {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ==================== 组件魔改：Bootstrap Override ==================== */
+
+        /* 1. 导航栏：改为半透明玻璃态 */
         .navbar {
-            background: linear-gradient(135deg, #ff6b8a 0%, #e84a7f 50%, #d63384 100%);
-            box-shadow: 0 4px 20px rgba(232, 74, 127, 0.3);
+            background: rgba(255, 107, 138, 0.85) !important; /* 主粉色半透明 */
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-soft);
+            padding: 1rem 0;
+            border-bottom: var(--glass-border);
         }
-
         .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
         }
 
-        .user-info {
-            color: white;
-            margin-right: 15px;
-        }
-
-        .btn-logout {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-
-        .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-
-        .content-wrapper {
-            padding: 30px 0;
-        }
-
+        /* 2. 卡片：核心改造！从白纸变成磨砂玻璃 */
         .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+            backdrop-filter: blur(12px); /* 关键：背景模糊 */
+            border: var(--glass-border);
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+            overflow: hidden; /* 防止内容溢出圆角 */
+        }
+        .card:hover {
+            transform: translateY(-5px); /* 悬浮效果 */
+            box-shadow: var(--shadow-hover);
         }
 
+        /* 卡片头部 */
+        .card-header {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(232, 74, 127, 0.1);
+        }
+
+        /* 卡片底部 */
+        .card-footer {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(232, 74, 127, 0.1);
+        }
+
+        /* 3. 按钮：从直角变成胶囊，颜色换成渐变 */
+        .btn {
+            border-radius: var(--radius-pill);
+            padding: 10px 24px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
         .btn-primary {
             background: linear-gradient(135deg, #ff6b8a 0%, #e84a7f 100%);
             border: none;
+            box-shadow: 0 4px 15px rgba(232, 74, 127, 0.3);
         }
-
         .btn-primary:hover {
             background: linear-gradient(135deg, #e84a7f 0%, #d63384 100%);
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            transform: translateY(-2px);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            border: none;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #ff9800 0%, #ff6f00 100%);
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border: none;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+        }
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            border: none;
+        }
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+            transform: translateY(-2px);
+        }
+        .btn-outline-primary {
+            color: var(--primary-rose);
+            border-color: var(--primary-pink);
+            border-width: 2px;
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary-pink);
+            border-color: var(--primary-pink);
+            color: white;
+        }
+        .btn-outline-danger {
+            border-width: 2px;
+        }
+
+        /* 4. 输入框：变圆润 */
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 12px;
+            border: 2px solid #f0e4e8;
+            background: rgba(255,255,255,0.9);
+            transition: all 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 0 4px rgba(255, 107, 138, 0.15);
+            background: rgba(255,255,255,1);
+        }
+
+        /* 5. 调整主内容区 */
+        .content-wrapper {
+            padding: 40px 0;
+        }
+
+        /* 6. 模态框美化 */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: none;
+            box-shadow: var(--shadow-hover);
+        }
+        .modal-header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-radius: 24px 24px 0 0;
+        }
+        .modal-footer {
+            border-top: none;
+            border-radius: 0 0 24px 24px;
+        }
+
+        /* 7. 徽章美化 */
+        .badge {
+            border-radius: 12px;
+            padding: 6px 12px;
+            font-weight: 500;
+        }
+
+        /* 8. 列表组美化 */
+        .list-group-item {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(232, 74, 127, 0.1);
+            border-radius: 12px !important;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+        .list-group-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateX(5px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* 9. 表格美化 */
+        .table {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-large);
+            overflow: hidden;
+        }
+        .table thead {
+            background: rgba(255, 107, 138, 0.1);
+        }
+        .table-hover tbody tr:hover {
+            background: rgba(255, 107, 138, 0.05);
+        }
+
+        /* 10. Alert美化 */
+        .alert {
+            border-radius: 16px;
+            border: none;
+            backdrop-filter: blur(10px);
+        }
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            color: #155724;
+        }
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.15);
+            color: #721c24;
+        }
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.15);
+            color: #856404;
+        }
+        .alert-info {
+            background: rgba(23, 162, 184, 0.15);
+            color: #0c5460;
+        }
+
+        /* 11. 标签页美化 */
+        .nav-tabs {
+            border-bottom: 2px solid rgba(232, 74, 127, 0.2);
+        }
+        .nav-tabs .nav-link {
+            border-radius: 12px 12px 0 0;
+            border: none;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 107, 138, 0.1);
+            color: var(--primary-rose);
+        }
+        .nav-tabs .nav-link.active {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            color: var(--primary-rose);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary-pink);
+        }
+
+        /* 12. 加载动画 */
+        .spinner-border {
+            color: var(--primary-pink);
+        }
+
+        /* 13. 页脚 */
+        footer {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            margin-top: 60px;
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="floating-hearts">
+        <div class="heart">💗</div><div class="heart">💕</div>
+        <div class="heart">💖</div><div class="heart">✨</div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-heart-fill"></i> 心动积分系统
+                <i class="bi bi-heart-fill"></i> 心动积分
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -80,176 +323,115 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="bi bi-house-fill"></i> 首页
-                        </a>
+                        <a class="nav-link" href="/"><i class="bi bi-house-door-fill"></i> 首页</a>
                     </li>
                     <li class="nav-item" id="dashboardNav" style="display: none;">
-                        <a class="nav-link" href="/dashboard">
-                            <i class="bi bi-speedometer2"></i> 仪表板
-                        </a>
+                        <a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2"></i> 仪表盘</a>
                     </li>
                     <li class="nav-item" id="rewardsNav" style="display: none;">
-                        <a class="nav-link" href="/rewards">
-                            <i class="bi bi-gift-fill"></i> 奖励管理
-                        </a>
+                        <a class="nav-link" href="/rewards"><i class="bi bi-gift-fill"></i> 奖励超市</a>
                     </li>
                     <li class="nav-item" id="adminNav" style="display: none;">
-                        <a class="nav-link" href="/admin">
-                            <i class="bi bi-shield-fill-check"></i> 管理后台
-                        </a>
+                        <a class="nav-link" href="/admin"><i class="bi bi-shield-lock-fill"></i> 后台</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center" id="userSection" style="display: none !important;">
-                    <span class="user-info">
-                        <i class="bi bi-person-circle"></i>
+                    <span class="user-info me-3 text-white fw-bold">
+                        <i class="bi bi-person-circle opacity-75"></i>
                         <span id="usernameDisplay"></span>
                     </span>
-                    <button class="btn btn-logout btn-sm" onclick="logout()">
-                        <i class="bi bi-box-arrow-right"></i> 登出
+                    <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="logout()">
+                        登出
                     </button>
                 </div>
                 <div id="loginSection">
-                    <a href="/login" class="btn btn-light btn-sm">
-                        <i class="bi bi-box-arrow-in-right"></i> 登录
+                    <a href="/login" class="btn btn-light btn-sm text-primary fw-bold px-4 rounded-pill">
+                        登录
                     </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- 主内容区 -->
     <div class="content-wrapper">
         <div class="container">
             {% block content %}{% endblock %}
         </div>
     </div>
 
-    <!-- 页脚 -->
-    <footer class="text-center py-4 mt-5">
+    <footer class="text-center py-4 mt-auto">
         <div class="container">
-            <p class="text-muted mb-0">
-                <i class="bi bi-heart-fill text-danger"></i>
+            <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                <span style="color: var(--primary-pink)">💕</span>
                 © 2025 心动积分系统 v2.0 · 用爱记录每一刻
             </p>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- 全局JavaScript -->
     <script>
-        // 获取API基础URL
         const API_BASE_URL = '/api';
-
-        // 获取Token
-        function getToken() {
-            return localStorage.getItem('token');
-        }
-
-        // 获取认证头
+        function getToken() { return localStorage.getItem('token'); }
         function getAuthHeaders() {
             const token = getToken();
-            return {
-                'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''
-            };
+            return { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' };
         }
-
-        // 检查登录状态
         function checkLoginStatus() {
             const token = getToken();
             const username = localStorage.getItem('username');
             const isAdmin = localStorage.getItem('is_admin') === 'true';
 
             if (token && username) {
-                // 显示用户信息
                 document.getElementById('usernameDisplay').textContent = username;
                 document.getElementById('userSection').style.display = 'flex';
                 document.getElementById('loginSection').style.display = 'none';
-
-                // 显示相应的导航菜单
                 if (isAdmin) {
                     document.getElementById('adminNav').style.display = 'block';
                 } else {
                     document.getElementById('dashboardNav').style.display = 'block';
                     document.getElementById('rewardsNav').style.display = 'block';
                 }
-
                 return true;
             } else {
-                // 未登录状态
                 document.getElementById('userSection').style.display = 'none';
                 document.getElementById('loginSection').style.display = 'block';
                 return false;
             }
         }
-
-        // 登出
         function logout() {
             if (confirm('确定要登出吗？')) {
-                // 清除本地存储
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                localStorage.removeItem('is_admin');
-                localStorage.removeItem('couple_id');
-                localStorage.removeItem('couple_names');
-
-                // 跳转到登录页
+                localStorage.clear();
                 window.location.href = '/login';
             }
         }
-
-        // 显示提示消息
         function showAlert(message, type = 'info') {
             const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            // 调整 Alert 样式以匹配新主题
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow-sm border-0 rounded-4`;
+            alertDiv.style.background = 'rgba(255,255,255,0.95)';
             alertDiv.innerHTML = `
-                ${message}
+                ${type === 'success' ? '✨ ' : '⚠️ '} ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
-
             const container = document.querySelector('.container');
             container.insertBefore(alertDiv, container.firstChild);
-
-            // 3秒后自动关闭
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 3000);
+            setTimeout(() => { alertDiv.remove(); }, 3000);
         }
-
-        // 页面加载时检查登录状态
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLoginStatus();
-        });
-
-        // API请求封装
+        document.addEventListener('DOMContentLoaded', function() { checkLoginStatus(); });
         async function apiRequest(url, options = {}) {
             try {
                 const response = await fetch(API_BASE_URL + url, {
                     ...options,
-                    headers: {
-                        ...getAuthHeaders(),
-                        ...options.headers
-                    }
+                    headers: { ...getAuthHeaders(), ...options.headers }
                 });
-
                 const data = await response.json();
-
                 if (response.status === 401) {
-                    // Token过期或未登录
                     showAlert('登录已过期，请重新登录', 'warning');
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 1500);
+                    setTimeout(() => { window.location.href = '/login'; }, 1500);
                     return null;
                 }
-
-                if (!response.ok) {
-                    throw new Error(data.detail || '请求失败');
-                }
-
+                if (!response.ok) throw new Error(data.detail || '请求失败');
                 return data;
             } catch (error) {
                 console.error('API请求错误:', error);
@@ -258,7 +440,6 @@
             }
         }
     </script>
-
     {% block scripts %}{% endblock %}
 </body>
 </html>
