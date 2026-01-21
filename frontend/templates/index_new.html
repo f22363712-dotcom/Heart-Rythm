@@ -1,0 +1,289 @@
+{% extends "base_new.html" %}
+
+{% block title %}首页 - 心动积分系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <h1 class="display-4">
+                <i class="bi bi-heart-fill text-danger"></i>
+                欢迎来到心动积分系统
+            </h1>
+            <p class="lead text-muted">用爱记录每一刻，让感情更有温度</p>
+        </div>
+    </div>
+</div>
+
+<!-- 未登录状态 -->
+<div id="guestView">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-heart-pulse display-1 text-danger mb-3"></i>
+                    <h3 class="card-title">什么是心动积分？</h3>
+                    <p class="card-text">
+                        心动积分是一个专为情侣设计的积分管理系统。
+                        通过完成任务、达成目标来获得积分，
+                        用积分兑换浪漫奖励，让爱情更有仪式感。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-gift display-1 text-primary mb-3"></i>
+                    <h3 class="card-title">如何使用？</h3>
+                    <p class="card-text">
+                        1. 注册账号并创建情侣档案<br>
+                        2. 完成任务获得积分<br>
+                        3. 设置专属奖励<br>
+                        4. 用积分兑换浪漫奖励
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="card">
+                <div class="card-body py-5">
+                    <h3 class="mb-4">开始你们的心动之旅</h3>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="/login" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> 立即登录
+                        </a>
+                        <a href="/login" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-person-plus"></i> 注册账号
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 已登录状态 - 普通用户 -->
+<div id="userView" style="display: none;">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #ff6b8a 0%, #e84a7f 100%);">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        <i class="bi bi-heart-fill"></i>
+                        <span id="coupleNames"></span>
+                    </h3>
+                    <h1 class="display-3 mb-0">
+                        <span id="currentPoints">0</span> 积分
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-speedometer2 display-1 text-primary mb-3"></i>
+                    <h5 class="card-title">仪表板</h5>
+                    <p class="card-text">查看积分详情和历史记录</p>
+                    <a href="/dashboard" class="btn btn-primary">
+                        <i class="bi bi-arrow-right"></i> 进入
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-gift display-1 text-success mb-3"></i>
+                    <h5 class="card-title">奖励管理</h5>
+                    <p class="card-text">设置和兑换专属奖励</p>
+                    <a href="/rewards" class="btn btn-success">
+                        <i class="bi bi-arrow-right"></i> 进入
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-list-check display-1 text-warning mb-3"></i>
+                    <h5 class="card-title">快速操作</h5>
+                    <p class="card-text">添加积分或兑换奖励</p>
+                    <button class="btn btn-warning" onclick="showAddPointsModal()">
+                        <i class="bi bi-plus-circle"></i> 添加积分
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 已登录状态 - 管理员 -->
+<div id="adminView" style="display: none;">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-people display-1 text-primary mb-3"></i>
+                    <h3 class="display-4" id="totalCouples">0</h3>
+                    <p class="text-muted">情侣总数</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-coin display-1 text-warning mb-3"></i>
+                    <h3 class="display-4" id="totalPoints">0</h3>
+                    <p class="text-muted">总积分</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-gift display-1 text-success mb-3"></i>
+                    <h3 class="display-4" id="totalExchanges">0</h3>
+                    <p class="text-muted">兑换次数</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-4">管理员功能</h4>
+                    <a href="/admin" class="btn btn-primary btn-lg">
+                        <i class="bi bi-shield-fill-check"></i> 进入管理后台
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加积分模态框 -->
+<div class="modal fade" id="addPointsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle"></i> 添加积分
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPointsForm">
+                    <div class="mb-3">
+                        <label for="pointsChange" class="form-label">积分变化</label>
+                        <input type="number" class="form-control" id="pointsChange" required>
+                        <small class="form-text text-muted">正数增加，负数减少</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">原因</label>
+                        <input type="text" class="form-control" id="reason" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddPoints()">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let addPointsModalInstance;
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 初始化模态框
+        const modalElement = document.getElementById('addPointsModal');
+        if (modalElement) {
+            addPointsModalInstance = new bootstrap.Modal(modalElement);
+        }
+
+        const token = getToken();
+        const isAdmin = localStorage.getItem('is_admin') === 'true';
+
+        if (!token) {
+            // 未登录，显示访客视图
+            document.getElementById('guestView').style.display = 'block';
+        } else if (isAdmin) {
+            // 管理员视图
+            document.getElementById('adminView').style.display = 'block';
+            await loadAdminStats();
+        } else {
+            // 普通用户视图
+            document.getElementById('userView').style.display = 'block';
+            await loadUserInfo();
+        }
+    });
+
+    // 加载用户信息
+    async function loadUserInfo() {
+        const data = await apiRequest('/auth/me');
+        if (data && data.couple) {
+            document.getElementById('coupleNames').textContent =
+                `${data.couple.names[0]} & ${data.couple.names[1]}`;
+            document.getElementById('currentPoints').textContent = data.couple.points;
+        }
+    }
+
+    // 加载管理员统计
+    async function loadAdminStats() {
+        const data = await apiRequest('/admin/stats');
+        if (data) {
+            document.getElementById('totalCouples').textContent = data.total_couples;
+            document.getElementById('totalPoints').textContent = data.total_points;
+            document.getElementById('totalExchanges').textContent = data.total_exchanges;
+        }
+    }
+
+    // 显示添加积分模态框
+    function showAddPointsModal() {
+        if (addPointsModalInstance) {
+            addPointsModalInstance.show();
+        }
+    }
+
+    // 提交添加积分
+    async function submitAddPoints() {
+        const pointsChange = parseInt(document.getElementById('pointsChange').value);
+        const reason = document.getElementById('reason').value;
+
+        if (!pointsChange || !reason) {
+            showAlert('请填写完整信息', 'warning');
+            return;
+        }
+
+        const data = await apiRequest('/points', {
+            method: 'POST',
+            body: JSON.stringify({
+                points_change: pointsChange,
+                reason: reason
+            })
+        });
+
+        if (data) {
+            showAlert('积分更新成功！', 'success');
+            addPointsModalInstance.hide();
+            document.getElementById('addPointsForm').reset();
+            await loadUserInfo();
+        }
+    }
+</script>
+{% endblock %}

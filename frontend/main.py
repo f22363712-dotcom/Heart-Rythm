@@ -1,12 +1,13 @@
 """
-心动积分项目 - 前端应用
-使用Flask构建Web界面
+心动积分项目 - 前端应用 (v2.0)
+使用Flask构建Web界面，支持用户认证
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import requests
 
 app = Flask(__name__)
+app.secret_key = "heartbeat_secret_key_2024"  # 用于session加密
 
 # API配置
 API_BASE_URL = "http://localhost:8000"
@@ -14,42 +15,27 @@ API_BASE_URL = "http://localhost:8000"
 @app.route("/")
 def index():
     """首页"""
-    try:
-        response = requests.get(f"{API_BASE_URL}/stats/", timeout=5)
-        stats = response.json() if response.status_code == 200 else None
-    except Exception:
-        stats = None
-    return render_template("index.html", stats=stats)
+    return render_template("index_new.html")
 
-@app.route("/couples")
-def couples():
-    """情侣管理页面"""
-    try:
-        response = requests.get(f"{API_BASE_URL}/couples/", timeout=5)
-        couples_data = response.json().get("couples", []) if response.status_code == 200 else []
-    except Exception:
-        couples_data = []
-    return render_template("couples.html", couples=couples_data)
+@app.route("/login")
+def login():
+    """登录页面"""
+    return render_template("login.html")
+
+@app.route("/dashboard")
+def dashboard():
+    """用户仪表板"""
+    return render_template("dashboard.html")
 
 @app.route("/rewards")
 def rewards():
     """奖励管理页面"""
-    try:
-        response = requests.get(f"{API_BASE_URL}/rewards/", timeout=5)
-        rewards_data = response.json().get("rewards", []) if response.status_code == 200 else []
-    except Exception:
-        rewards_data = []
-    return render_template("rewards.html", rewards=rewards_data)
+    return render_template("rewards.html")
 
-@app.route("/stats")
-def stats():
-    """数据统计页面"""
-    try:
-        response = requests.get(f"{API_BASE_URL}/stats/", timeout=5)
-        stats_data = response.json() if response.status_code == 200 else None
-    except Exception:
-        stats_data = None
-    return render_template("stats.html", stats=stats_data)
+@app.route("/admin")
+def admin():
+    """管理员后台"""
+    return render_template("admin.html")
 
 # API代理路由
 @app.route("/api/<path:path>", methods=["GET", "POST", "PUT", "DELETE"])

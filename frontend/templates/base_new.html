@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}心动积分系统{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-pink: #ff6b8a;
+            --primary-rose: #e84a7f;
+            --bg-gradient: linear-gradient(135deg, #fff9f5 0%, #fff0f3 50%, #ffe4ec 100%);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #ff6b8a 0%, #e84a7f 50%, #d63384 100%);
+            box-shadow: 0 4px 20px rgba(232, 74, 127, 0.3);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            color: white;
+            margin-right: 15px;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .content-wrapper {
+            padding: 30px 0;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b8a 0%, #e84a7f 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #e84a7f 0%, #d63384 100%);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-heart-fill"></i> 心动积分系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-fill"></i> 首页
+                        </a>
+                    </li>
+                    <li class="nav-item" id="dashboardNav" style="display: none;">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="bi bi-speedometer2"></i> 仪表板
+                        </a>
+                    </li>
+                    <li class="nav-item" id="rewardsNav" style="display: none;">
+                        <a class="nav-link" href="/rewards">
+                            <i class="bi bi-gift-fill"></i> 奖励管理
+                        </a>
+                    </li>
+                    <li class="nav-item" id="adminNav" style="display: none;">
+                        <a class="nav-link" href="/admin">
+                            <i class="bi bi-shield-fill-check"></i> 管理后台
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center" id="userSection" style="display: none !important;">
+                    <span class="user-info">
+                        <i class="bi bi-person-circle"></i>
+                        <span id="usernameDisplay"></span>
+                    </span>
+                    <button class="btn btn-logout btn-sm" onclick="logout()">
+                        <i class="bi bi-box-arrow-right"></i> 登出
+                    </button>
+                </div>
+                <div id="loginSection">
+                    <a href="/login" class="btn btn-light btn-sm">
+                        <i class="bi bi-box-arrow-in-right"></i> 登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="content-wrapper">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="text-center py-4 mt-5">
+        <div class="container">
+            <p class="text-muted mb-0">
+                <i class="bi bi-heart-fill text-danger"></i>
+                © 2025 心动积分系统 v2.0 · 用爱记录每一刻
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 全局JavaScript -->
+    <script>
+        // 获取API基础URL
+        const API_BASE_URL = '/api';
+
+        // 获取Token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // 获取认证头
+        function getAuthHeaders() {
+            const token = getToken();
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''
+            };
+        }
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            const token = getToken();
+            const username = localStorage.getItem('username');
+            const isAdmin = localStorage.getItem('is_admin') === 'true';
+
+            if (token && username) {
+                // 显示用户信息
+                document.getElementById('usernameDisplay').textContent = username;
+                document.getElementById('userSection').style.display = 'flex';
+                document.getElementById('loginSection').style.display = 'none';
+
+                // 显示相应的导航菜单
+                if (isAdmin) {
+                    document.getElementById('adminNav').style.display = 'block';
+                } else {
+                    document.getElementById('dashboardNav').style.display = 'block';
+                    document.getElementById('rewardsNav').style.display = 'block';
+                }
+
+                return true;
+            } else {
+                // 未登录状态
+                document.getElementById('userSection').style.display = 'none';
+                document.getElementById('loginSection').style.display = 'block';
+                return false;
+            }
+        }
+
+        // 登出
+        function logout() {
+            if (confirm('确定要登出吗？')) {
+                // 清除本地存储
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                localStorage.removeItem('is_admin');
+                localStorage.removeItem('couple_id');
+                localStorage.removeItem('couple_names');
+
+                // 跳转到登录页
+                window.location.href = '/login';
+            }
+        }
+
+        // 显示提示消息
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            // 3秒后自动关闭
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+        });
+
+        // API请求封装
+        async function apiRequest(url, options = {}) {
+            try {
+                const response = await fetch(API_BASE_URL + url, {
+                    ...options,
+                    headers: {
+                        ...getAuthHeaders(),
+                        ...options.headers
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    // Token过期或未登录
+                    showAlert('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return null;
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.detail || '请求失败');
+                }
+
+                return data;
+            } catch (error) {
+                console.error('API请求错误:', error);
+                showAlert(error.message, 'danger');
+                return null;
+            }
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
