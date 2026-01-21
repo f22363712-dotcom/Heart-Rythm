@@ -30,7 +30,7 @@ def dashboard():
 @app.route("/rewards")
 def rewards():
     """奖励管理页面"""
-    return render_template("rewards.html")
+    return render_template("rewards_new.html")
 
 @app.route("/admin")
 def admin():

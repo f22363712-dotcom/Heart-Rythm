@@ -1,0 +1,295 @@
+{% extends "base_new.html" %}
+
+{% block title %}仪表板 - 心动积分系统{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>
+            <i class="bi bi-speedometer2"></i> 我的仪表板
+        </h2>
+        <p class="text-muted">查看积分详情和历史记录</p>
+    </div>
+</div>
+
+<!-- 积分概览 -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-heart-fill display-1 text-danger mb-3"></i>
+                <h5 class="card-title text-muted">情侣信息</h5>
+                <h3 id="coupleNames">加载中...</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-coin display-1 text-warning mb-3"></i>
+                <h5 class="card-title text-muted">当前积分</h5>
+                <h2 class="display-4 text-primary" id="currentPoints">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-graph-up display-1 text-success mb-3"></i>
+                <h5 class="card-title text-muted">历史记录</h5>
+                <h2 class="display-4 text-success" id="historyCount">0</h2>
+                <small class="text-muted">条记录</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 快速操作 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-lightning-fill"></i> 快速操作
+                </h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-primary" onclick="showAddPointsModal()">
+                        <i class="bi bi-plus-circle"></i> 添加积分
+                    </button>
+                    <button class="btn btn-success" onclick="window.location.href='/rewards'">
+                        <i class="bi bi-gift"></i> 查看奖励
+                    </button>
+                    <button class="btn btn-info text-white" onclick="loadHistory()">
+                        <i class="bi bi-arrow-clockwise"></i> 刷新数据
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 积分历史 -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> 积分历史
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="historyList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2 text-muted">加载历史记录...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加积分模态框 -->
+<div class="modal fade" id="addPointsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle"></i> 添加积分
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPointsForm">
+                    <div class="mb-3">
+                        <label for="pointsChange" class="form-label">积分变化</label>
+                        <input type="number" class="form-control" id="pointsChange" required>
+                        <small class="form-text text-muted">正数增加，负数减少</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">原因</label>
+                        <input type="text" class="form-control" id="reason" required placeholder="例如：完成每日任务">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddPoints()">
+                    <i class="bi bi-check-circle"></i> 确定
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let addPointsModalInstance;
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 检查登录状态
+        if (!getToken()) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // 初始化模态框
+        const modalElement = document.getElementById('addPointsModal');
+        if (modalElement) {
+            addPointsModalInstance = new bootstrap.Modal(modalElement);
+        }
+
+        // 加载数据
+        await loadDashboardData();
+    });
+
+    // 加载仪表板数据
+    async function loadDashboardData() {
+        await Promise.all([
+            loadCoupleInfo(),
+            loadHistory()
+        ]);
+    }
+
+    // 加载情侣信息
+    async function loadCoupleInfo() {
+        const data = await apiRequest('/couples/me');
+        if (data) {
+            document.getElementById('coupleNames').textContent =
+                `${data.names[0]} & ${data.names[1]}`;
+            document.getElementById('currentPoints').textContent = data.points;
+        }
+    }
+
+    // 加载积分历史
+    async function loadHistory() {
+        const data = await apiRequest('/points/history?limit=50');
+        if (data && data.history) {
+            displayHistory(data.history);
+            document.getElementById('historyCount').textContent = data.history.length;
+        }
+    }
+
+    // 显示历史记录
+    function displayHistory(history) {
+        const listElement = document.getElementById('historyList');
+
+        if (history.length === 0) {
+            listElement.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox display-1"></i>
+                    <p class="mt-3">暂无积分记录</p>
+                    <button class="btn btn-primary" onclick="showAddPointsModal()">
+                        <i class="bi bi-plus-circle"></i> 添加第一条记录
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="list-group">';
+        history.forEach(record => {
+            const isPositive = record.points_change > 0;
+            const badgeClass = isPositive ? 'bg-success' : 'bg-danger';
+            const icon = isPositive ? 'arrow-up-circle' : 'arrow-down-circle';
+            const sign = isPositive ? '+' : '';
+
+            const date = new Date(record.created_time);
+            const dateStr = date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            html += `
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="bi bi-${icon} text-${isPositive ? 'success' : 'danger'}"></i>
+                                ${record.reason || '无原因'}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> ${dateStr}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${badgeClass} fs-5">
+                                ${sign}${record.points_change}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        listElement.innerHTML = html;
+    }
+
+    // 显示添加积分模态框
+    function showAddPointsModal() {
+        if (addPointsModalInstance) {
+            document.getElementById('addPointsForm').reset();
+            addPointsModalInstance.show();
+        }
+    }
+
+    // 提交添加积分
+    async function submitAddPoints() {
+        const pointsChange = parseInt(document.getElementById('pointsChange').value);
+        const reason = document.getElementById('reason').value.trim();
+
+        if (!pointsChange || !reason) {
+            showAlert('请填写完整信息', 'warning');
+            return;
+        }
+
+        if (pointsChange === 0) {
+            showAlert('积分变化不能为0', 'warning');
+            return;
+        }
+
+        const data = await apiRequest('/points', {
+            method: 'POST',
+            body: JSON.stringify({
+                points_change: pointsChange,
+                reason: reason
+            })
+        });
+
+        if (data) {
+            showAlert('积分更新成功！', 'success');
+            addPointsModalInstance.hide();
+            document.getElementById('addPointsForm').reset();
+
+            // 刷新数据
+            await loadDashboardData();
+        }
+    }
+</script>
+
+{% block extra_css %}
+<style>
+    .list-group-item {
+        border-left: 4px solid #dee2e6;
+        transition: all 0.3s;
+    }
+
+    .list-group-item:hover {
+        border-left-color: #0d6efd;
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+
+    .badge {
+        min-width: 80px;
+    }
+</style>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,413 @@
+{% extends "base_new.html" %}
+
+{% block title %}奖励管理 - 心动积分系统{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>
+            <i class="bi bi-gift-fill"></i> 奖励管理
+        </h2>
+        <p class="text-muted">设置和兑换专属奖励</p>
+    </div>
+</div>
+
+<!-- 标签页 -->
+<ul class="nav nav-tabs mb-4" id="rewardTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="my-rewards-tab" data-bs-toggle="tab" data-bs-target="#my-rewards" type="button">
+            <i class="bi bi-star-fill"></i> 我的奖励
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="base-rewards-tab" data-bs-toggle="tab" data-bs-target="#base-rewards" type="button">
+            <i class="bi bi-lightbulb-fill"></i> 基础奖励（参考）
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="exchange-history-tab" data-bs-toggle="tab" data-bs-target="#exchange-history" type="button">
+            <i class="bi bi-clock-history"></i> 兑换记录
+        </button>
+    </li>
+</ul>
+
+<!-- 标签页内容 -->
+<div class="tab-content" id="rewardTabsContent">
+    <!-- 我的奖励 -->
+    <div class="tab-pane fade show active" id="my-rewards">
+        <div class="mb-3">
+            <button class="btn btn-primary" onclick="showCreateRewardModal()">
+                <i class="bi bi-plus-circle"></i> 创建奖励
+            </button>
+        </div>
+
+        <div id="myRewardsList">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">加载中...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 基础奖励 -->
+    <div class="tab-pane fade" id="base-rewards">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            以下是系统预设的基础奖励列表，供您参考。您可以根据这些创建自己的专属奖励。
+        </div>
+
+        <div id="baseRewardsList">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">加载中...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 兑换记录 -->
+    <div class="tab-pane fade" id="exchange-history">
+        <div id="exchangeHistoryList">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">加载中...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创建/编辑奖励模态框 -->
+<div class="modal fade" id="rewardModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rewardModalTitle">
+                    <i class="bi bi-plus-circle"></i> 创建奖励
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rewardForm">
+                    <input type="hidden" id="rewardId">
+                    <div class="mb-3">
+                        <label for="rewardName" class="form-label">奖励名称 *</label>
+                        <input type="text" class="form-control" id="rewardName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pointsNeeded" class="form-label">所需积分 *</label>
+                        <input type="number" class="form-control" id="pointsNeeded" required min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">库存数量 *</label>
+                        <input type="number" class="form-control" id="stock" required min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">描述</label>
+                        <textarea class="form-control" id="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitReward()">
+                    <i class="bi bi-check-circle"></i> 保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let rewardModalInstance;
+    let currentRewardId = null;
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 检查登录状态
+        if (!getToken()) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // 初始化模态框
+        const modalElement = document.getElementById('rewardModal');
+        if (modalElement) {
+            rewardModalInstance = new bootstrap.Modal(modalElement);
+        }
+
+        // 加载数据
+        await loadAllData();
+
+        // 监听标签页切换
+        document.getElementById('base-rewards-tab').addEventListener('shown.bs.tab', loadBaseRewards);
+        document.getElementById('exchange-history-tab').addEventListener('shown.bs.tab', loadExchangeHistory);
+    });
+
+    // 加载所有数据
+    async function loadAllData() {
+        await loadMyRewards();
+    }
+
+    // 加载我的奖励
+    async function loadMyRewards() {
+        const data = await apiRequest('/rewards');
+        if (data && data.rewards) {
+            displayMyRewards(data.rewards);
+        }
+    }
+
+    // 显示我的奖励
+    function displayMyRewards(rewards) {
+        const listElement = document.getElementById('myRewardsList');
+
+        if (rewards.length === 0) {
+            listElement.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-gift display-1"></i>
+                    <p class="mt-3">还没有创建奖励</p>
+                    <button class="btn btn-primary" onclick="showCreateRewardModal()">
+                        <i class="bi bi-plus-circle"></i> 创建第一个奖励
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="row">';
+        rewards.forEach(reward => {
+            const canExchange = reward.stock > 0;
+            html += `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-gift-fill text-primary"></i>
+                                ${reward.name}
+                            </h5>
+                            <p class="card-text text-muted">${reward.description || '暂无描述'}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-coin"></i> ${reward.points_needed} 积分
+                                </span>
+                                <span class="badge ${canExchange ? 'bg-success' : 'bg-secondary'}">
+                                    库存: ${reward.stock}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="btn-group w-100" role="group">
+                                <button class="btn btn-sm btn-success ${!canExchange ? 'disabled' : ''}"
+                                        onclick="exchangeReward('${reward.reward_id}', '${reward.name}', ${reward.points_needed})"
+                                        ${!canExchange ? 'disabled' : ''}>
+                                    <i class="bi bi-cart-check"></i> 兑换
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        onclick="editReward('${reward.reward_id}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteReward('${reward.reward_id}', '${reward.name}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        listElement.innerHTML = html;
+    }
+
+    // 加载基础奖励
+    async function loadBaseRewards() {
+        const data = await apiRequest('/rewards/base');
+        if (data && data.rewards) {
+            displayBaseRewards(data.rewards);
+        }
+    }
+
+    // 显示基础奖励
+    function displayBaseRewards(rewards) {
+        const listElement = document.getElementById('baseRewardsList');
+
+        let html = '<div class="row">';
+        rewards.forEach(reward => {
+            html += `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-lightbulb-fill text-warning"></i>
+                                ${reward.name}
+                            </h5>
+                            <p class="card-text text-muted">${reward.description || '暂无描述'}</p>
+                            <span class="badge bg-info text-dark">
+                                <i class="bi bi-coin"></i> ${reward.points_needed} 积分
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        listElement.innerHTML = html;
+    }
+
+    // 加载兑换记录
+    async function loadExchangeHistory() {
+        const data = await apiRequest('/exchanges');
+        if (data && data.exchanges) {
+            displayExchangeHistory(data.exchanges);
+        }
+    }
+
+    // 显示兑换记录
+    function displayExchangeHistory(exchanges) {
+        const listElement = document.getElementById('exchangeHistoryList');
+
+        if (exchanges.length === 0) {
+            listElement.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox display-1"></i>
+                    <p class="mt-3">暂无兑换记录</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="list-group">';
+        exchanges.forEach(record => {
+            const date = new Date(record.exchange_time);
+            const dateStr = date.toLocaleString('zh-CN');
+
+            html += `
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="bi bi-gift-fill text-success"></i>
+                                ${record.reward_name || '未知奖励'}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> ${dateStr}
+                            </small>
+                        </div>
+                        <span class="badge bg-danger fs-6">
+                            -${record.points_used} 积分
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        listElement.innerHTML = html;
+    }
+
+    // 显示创建奖励模态框
+    function showCreateRewardModal() {
+        currentRewardId = null;
+        document.getElementById('rewardModalTitle').innerHTML =
+            '<i class="bi bi-plus-circle"></i> 创建奖励';
+        document.getElementById('rewardForm').reset();
+        document.getElementById('rewardId').value = '';
+        rewardModalInstance.show();
+    }
+
+    // 编辑奖励
+    async function editReward(rewardId) {
+        const data = await apiRequest('/rewards');
+        if (data && data.rewards) {
+            const reward = data.rewards.find(r => r.reward_id === rewardId);
+            if (reward) {
+                currentRewardId = rewardId;
+                document.getElementById('rewardModalTitle').innerHTML =
+                    '<i class="bi bi-pencil"></i> 编辑奖励';
+                document.getElementById('rewardId').value = rewardId;
+                document.getElementById('rewardName').value = reward.name;
+                document.getElementById('pointsNeeded').value = reward.points_needed;
+                document.getElementById('stock').value = reward.stock;
+                document.getElementById('description').value = reward.description || '';
+                rewardModalInstance.show();
+            }
+        }
+    }
+
+    // 提交奖励
+    async function submitReward() {
+        const name = document.getElementById('rewardName').value.trim();
+        const pointsNeeded = parseInt(document.getElementById('pointsNeeded').value);
+        const stock = parseInt(document.getElementById('stock').value);
+        const description = document.getElementById('description').value.trim();
+
+        if (!name || !pointsNeeded || stock < 0) {
+            showAlert('请填写完整信息', 'warning');
+            return;
+        }
+
+        const requestData = {
+            name,
+            points_needed: pointsNeeded,
+            stock,
+            description
+        };
+
+        let data;
+        if (currentRewardId) {
+            // 更新奖励
+            data = await apiRequest(`/rewards/${currentRewardId}`, {
+                method: 'PUT',
+                body: JSON.stringify(requestData)
+            });
+        } else {
+            // 创建奖励
+            data = await apiRequest('/rewards', {
+                method: 'POST',
+                body: JSON.stringify(requestData)
+            });
+        }
+
+        if (data) {
+            showAlert(currentRewardId ? '奖励更新成功！' : '奖励创建成功！', 'success');
+            rewardModalInstance.hide();
+            await loadMyRewards();
+        }
+    }
+
+    // 删除奖励
+    async function deleteReward(rewardId, rewardName) {
+        if (!confirm(`确定要删除奖励"${rewardName}"吗？`)) {
+            return;
+        }
+
+        const data = await apiRequest(`/rewards/${rewardId}`, {
+            method: 'DELETE'
+        });
+
+        if (data) {
+            showAlert('奖励删除成功！', 'success');
+            await loadMyRewards();
+        }
+    }
+
+    // 兑换奖励
+    async function exchangeReward(rewardId, rewardName, pointsNeeded) {
+        if (!confirm(`确定要兑换"${rewardName}"吗？\n将消耗 ${pointsNeeded} 积分`)) {
+            return;
+        }
+
+        const data = await apiRequest('/exchanges', {
+            method: 'POST',
+            body: JSON.stringify({
+                reward_id: rewardId
+            })
+        });
+
+        if (data) {
+            showAlert('兑换成功！', 'success');
+            await loadMyRewards();
+        }
+    }
+</script>
+{% endblock %}
