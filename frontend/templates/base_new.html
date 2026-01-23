@@ -11,21 +11,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <style>
-        /* ==================== 移植：原版核心变量 ==================== */
+        /* ==================== 玫瑰腮红主题变量 ==================== */
         :root {
-            /* 颜色提取自原版 */
-            --primary-pink: #ff6b8a;
-            --primary-rose: #e84a7f;
-            --accent-coral: #ff8a80;
-            --bg-cream: #fff9f5; /* 暖白背景 */
-            --bg-gradient: linear-gradient(135deg, #fff9f5 0%, #fff0f3 50%, #ffe4ec 100%);
+            /* 主色：优雅的玫瑰腮红色系 */
+            --rose-blush: #e891a9;        /* 柔和的玫瑰粉 */
+            --rose-mauve: #d47a9e;        /* 深紫调玫瑰 */
+            --rose-dawn: #f4b6c2;         /* 晨曦玫瑰（最浅） */
+            --rose-deep: #c96a8a;         /* 深玫瑰紫 */
+
+            /* 强调色：保留但调整 */
+            --coral-blush: #ff9fb3;       /* 珊瑚粉 */
+            --accent-warm: #ffb3c1;       /* 温暖杏桃粉 */
+
+            /* 背景渐变：更柔和的腮红质感 */
+            --bg-cream: #faf5f7;          /* 淡淡的粉白 */
+            --bg-gradient: linear-gradient(135deg, #faf5f7 0%, #f8e8ed 25%, #f5d9e3 50%, #f8e8ed 75%, #faf5f7 100%);
 
             /* 玻璃质感变量 */
-            --card-bg: rgba(255, 255, 255, 0.75); /*稍微透明一点*/
-            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-            --shadow-soft: 0 8px 32px rgba(232, 74, 127, 0.1);
-            --shadow-hover: 0 12px 40px rgba(232, 74, 127, 0.2);
-            --radius-large: 20px;
+            --card-bg: rgba(255, 255, 255, 0.72); /* 稍微更透明一点 */
+            --glass-border: 1px solid rgba(255, 255, 255, 0.7);
+            --shadow-soft: 0 8px 32px rgba(212, 122, 158, 0.08); /* 更柔和的阴影 */
+            --shadow-hover: 0 12px 40px rgba(212, 122, 158, 0.15);
+            --radius-large: 24px;
             --radius-pill: 50px;
         }
 
@@ -55,7 +62,7 @@
             font-size: 24px;
             opacity: 0.15;
             animation: float-up 15s infinite ease-in-out;
-            color: var(--primary-pink);
+            color: var(--rose-blush);
         }
         .heart:nth-child(1) { left: 5%; animation-delay: 0s; font-size: 20px; }
         .heart:nth-child(2) { left: 15%; animation-delay: 2s; font-size: 28px; }
@@ -73,7 +80,7 @@
 
         /* 1. 导航栏：改为半透明玻璃态 */
         .navbar {
-            background: rgba(255, 107, 138, 0.85) !important; /* 主粉色半透明 */
+            background: rgba(232, 145, 169, 0.88) !important; /* 玫瑰腮红半透明 */
             backdrop-filter: blur(10px);
             box-shadow: var(--shadow-soft);
             padding: 1rem 0;
@@ -121,12 +128,12 @@
             transition: all 0.3s;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #ff6b8a 0%, #e84a7f 100%);
+            background: linear-gradient(135deg, var(--rose-blush) 0%, var(--rose-mauve) 100%);
             border: none;
-            box-shadow: 0 4px 15px rgba(232, 74, 127, 0.3);
+            box-shadow: 0 4px 15px rgba(212, 122, 158, 0.25);
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #e84a7f 0%, #d63384 100%);
+            background: linear-gradient(135deg, var(--rose-mauve) 0%, var(--rose-deep) 100%);
             transform: translateY(-2px);
         }
         .btn-success {
@@ -162,13 +169,13 @@
             transform: translateY(-2px);
         }
         .btn-outline-primary {
-            color: var(--primary-rose);
-            border-color: var(--primary-pink);
+            color: var(--rose-mauve);
+            border-color: var(--rose-blush);
             border-width: 2px;
         }
         .btn-outline-primary:hover {
-            background: var(--primary-pink);
-            border-color: var(--primary-pink);
+            background: var(--rose-blush);
+            border-color: var(--rose-blush);
             color: white;
         }
         .btn-outline-danger {
@@ -184,8 +191,8 @@
             transition: all 0.3s;
         }
         .form-control:focus, .form-select:focus {
-            border-color: var(--primary-pink);
-            box-shadow: 0 0 0 4px rgba(255, 107, 138, 0.15);
+            border-color: var(--rose-blush);
+            box-shadow: 0 0 0 4px rgba(232, 145, 169, 0.12);
             background: rgba(255,255,255,1);
         }
 
@@ -281,20 +288,20 @@
             transition: all 0.3s;
         }
         .nav-tabs .nav-link:hover {
-            background: rgba(255, 107, 138, 0.1);
-            color: var(--primary-rose);
+            background: rgba(232, 145, 169, 0.1);
+            color: var(--rose-mauve);
         }
         .nav-tabs .nav-link.active {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
-            color: var(--primary-rose);
+            color: var(--rose-mauve);
             font-weight: 600;
-            border-bottom: 3px solid var(--primary-pink);
+            border-bottom: 3px solid var(--rose-blush);
         }
 
         /* 12. 加载动画 */
         .spinner-border {
-            color: var(--primary-pink);
+            color: var(--rose-blush);
         }
 
         /* 13. 页脚 */
@@ -362,8 +369,8 @@
     <footer class="text-center py-4 mt-auto">
         <div class="container">
             <p class="text-muted mb-0" style="font-size: 0.9rem;">
-                <span style="color: var(--primary-pink)">💕</span>
-                © 2025 心动积分系统 v2.0 · 用爱记录每一刻
+                <span style="color: var(--rose-blush)">💕</span>
+                © 2025 心动积分系统 v2.1 · 用爱记录每一刻
             </p>
         </div>
     </footer>
