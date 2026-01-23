@@ -185,6 +185,14 @@
         gap: 16px;
         justify-content: center;
         flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .guest-invite .hint-text {
+        font-size: 0.9rem;
+        color: #a89bb0;
+        margin-top: 0;
+        opacity: 0.7;
     }
 
     /* 管理员视图 */
@@ -223,14 +231,18 @@
         <span class="heart-icon">💕</span>
         <h2>心动积分</h2>
         <p class="subtitle">"让每个小美好都有回响"</p>
+
+        <!-- 简化为单一入口 -->
         <div class="cta-buttons">
             <a href="/login" class="btn btn-primary btn-lg">
-                <i class="bi bi-box-arrow-in-right"></i> 回到你们的小屋
-            </a>
-            <a href="/login" class="btn btn-outline-primary btn-lg">
-                <i class="bi bi-heart-fill"></i> 创建心动小屋
+                <i class="bi bi-heart-fill"></i> 登录查看
             </a>
         </div>
+
+        <!-- 弱化的说明文字 -->
+        <p class="hint-text">
+            第一次来？可以在登录页注册
+        </p>
     </div>
 </div>
 
