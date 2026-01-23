@@ -94,17 +94,23 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# 归档目录（不提交到GitHub）
+archive/
+
 # 额外的辅助脚本和文档（不提交到GitHub）
-install_deps.bat
-run_tests.bat
-run_tests_global.bat
-run_tests.py
-打包作业.ps1
 *.zip
 
-# 答辩相关材料
+# 答辩相关材料（已归档）
 期末答辩/
 答辩流程与讲稿.md
 答辩内容详情.md
-查找与答辩说明.pdf
+抽签与答辩说明.pdf
 期末大作业报告.pdf
+期末大作业报告.md
+
+# 截图和演示材料（已归档）
+截图/
+文本说明/
+
+# 旧版对话记录
+conversation-*.txt

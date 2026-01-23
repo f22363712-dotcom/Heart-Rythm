@@ -10,6 +10,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#e891a9">
+
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/static/icons/icon-192x192.png">
+
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="心动积分">
+    <meta name="application-name" content="心动积分">
+
     <style>
         /* ==================== 玫瑰腮红主题变量 ==================== */
         :root {
@@ -310,6 +325,191 @@
             backdrop-filter: blur(10px);
             margin-top: 60px;
         }
+
+        /* ==================== 移动端优化 ==================== */
+
+        /* PWA 模式下的特殊样式 */
+        html.pwa-mode {
+            /* 为刘海屏和底部手势条留出空间 */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        html.pwa-mode .navbar {
+            padding-top: calc(1rem + env(safe-area-inset-top));
+        }
+
+        /* 移动端响应式优化 */
+        @media (max-width: 768px) {
+            /* 减小标题字号 */
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.3rem; }
+
+            /* 导航栏优化 */
+            .navbar-brand {
+                font-size: 1.4rem;
+                letter-spacing: 1px;
+            }
+
+            /* 卡片间距优化 */
+            .card {
+                margin-bottom: 1rem;
+            }
+
+            /* 按钮优化 */
+            .btn {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+
+            /* 表单优化 */
+            .form-control, .form-select {
+                padding: 10px;
+                font-size: 16px; /* 防止iOS自动缩放 */
+            }
+
+            /* 内容区域优化 */
+            .content-wrapper {
+                padding: 20px 0;
+            }
+
+            /* 浮动爱心减少数量 */
+            .heart:nth-child(3),
+            .heart:nth-child(4) {
+                display: none;
+            }
+
+            /* 模态框优化 */
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+
+            /* 表格优化 */
+            .table {
+                font-size: 0.85rem;
+            }
+
+            /* 页脚优化 */
+            footer {
+                margin-top: 40px;
+                padding: 1rem 0 !important;
+            }
+
+            footer p {
+                font-size: 0.8rem !important;
+            }
+        }
+
+        /* 小屏幕手机优化 */
+        @media (max-width: 576px) {
+            /* 进一步减小字号 */
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.3rem; }
+
+            /* 导航栏 */
+            .navbar {
+                padding: 0.5rem 0;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            /* 卡片 */
+            .card {
+                border-radius: 16px;
+            }
+
+            /* 按钮 */
+            .btn {
+                padding: 6px 16px;
+                font-size: 0.85rem;
+            }
+
+            /* 徽章 */
+            .badge {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
+
+            /* 列表项 */
+            .list-group-item {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .content-wrapper {
+                padding: 10px 0;
+            }
+
+            .card {
+                margin-bottom: 0.5rem;
+            }
+
+            footer {
+                margin-top: 20px;
+            }
+        }
+
+        /* 触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            /* 增大可点击区域 */
+            .btn, .nav-link, .list-group-item {
+                min-height: 44px; /* iOS 推荐的最小触摸目标 */
+            }
+
+            /* 移除悬停效果 */
+            .card:hover {
+                transform: none;
+            }
+
+            .list-group-item:hover {
+                transform: none;
+            }
+
+            /* 添加触摸反馈 */
+            .btn:active {
+                transform: scale(0.95);
+            }
+
+            .card:active {
+                opacity: 0.9;
+            }
+        }
+
+        /* 高对比度模式支持 */
+        @media (prefers-contrast: high) {
+            .card {
+                border: 2px solid var(--rose-mauve);
+            }
+
+            .btn {
+                border: 2px solid currentColor;
+            }
+        }
+
+        /* 减少动画模式支持 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .floating-hearts {
+                display: none;
+            }
+        }
+
+        /* 暗色模式支持（可选） */
+        @media (prefers-color-scheme: dark) {
+            /* 暂时不启用，保持浪漫的浅色主题 */
+            /* 如需启用，可以在这里添加暗色主题样式 */
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -376,6 +576,127 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- PWA Service Worker 注册 -->
+    <script>
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker 注册成功:', registration.scope);
+
+                        // 检查更新
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // 有新版本可用
+                                    if (confirm('发现新版本！点击确定刷新页面以更新。')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('❌ Service Worker 注册失败:', error);
+                    });
+
+                // 监听 Service Worker 控制器变化
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    console.log('🔄 Service Worker 已更新');
+                });
+            });
+        }
+
+        // PWA 安装提示
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // 阻止默认的安装提示
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // 显示自定义安装按钮
+            showInstallPromotion();
+        });
+
+        function showInstallPromotion() {
+            // 检查是否已经显示过安装提示
+            if (localStorage.getItem('pwa-install-dismissed') === 'true') {
+                return;
+            }
+
+            // 创建安装提示横幅
+            const installBanner = document.createElement('div');
+            installBanner.id = 'pwa-install-banner';
+            installBanner.className = 'alert alert-info alert-dismissible fade show position-fixed bottom-0 start-50 translate-middle-x mb-3 shadow-lg';
+            installBanner.style.cssText = 'z-index: 9999; max-width: 90%; width: 400px; border-radius: 16px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);';
+            installBanner.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-download fs-3 me-3" style="color: var(--rose-blush);"></i>
+                    <div class="flex-grow-1">
+                        <strong>安装心动积分</strong>
+                        <p class="mb-0 small">添加到主屏幕，随时记录爱的瞬间</p>
+                    </div>
+                </div>
+                <div class="mt-2 d-flex gap-2">
+                    <button class="btn btn-primary btn-sm flex-grow-1" onclick="installPWA()">
+                        <i class="bi bi-plus-circle"></i> 立即安装
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="dismissInstallPromotion()">
+                        稍后
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(installBanner);
+        }
+
+        function installPWA() {
+            if (!deferredPrompt) return;
+
+            // 显示安装提示
+            deferredPrompt.prompt();
+
+            // 等待用户响应
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('✅ 用户接受了安装');
+                } else {
+                    console.log('❌ 用户拒绝了安装');
+                }
+                deferredPrompt = null;
+                dismissInstallPromotion();
+            });
+        }
+
+        function dismissInstallPromotion() {
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) {
+                banner.remove();
+            }
+            localStorage.setItem('pwa-install-dismissed', 'true');
+        }
+
+        // 监听应用安装成功
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 PWA 安装成功！');
+            dismissInstallPromotion();
+        });
+
+        // 检测是否在 PWA 模式下运行
+        function isPWA() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true;
+        }
+
+        // 如果在 PWA 模式下，添加特殊样式
+        if (isPWA()) {
+            document.documentElement.classList.add('pwa-mode');
+            console.log('📱 运行在 PWA 模式');
+        }
+    </script>
 
     <script>
         const API_BASE_URL = '/api';
