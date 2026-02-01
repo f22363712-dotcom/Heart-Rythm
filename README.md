@@ -6,6 +6,17 @@
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![PWA](https://img.shields.io/badge/PWA-enabled-success.svg)](https://web.dev/progressive-web-apps/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![Deployed](https://img.shields.io/badge/deployed-online-success.svg)](https://heart-rythm-production.up.railway.app)
+
+## 🌐 在线访问
+
+**云端部署地址**: https://heart-rythm-production.up.railway.app
+
+- **API 文档**: https://heart-rythm-production.up.railway.app/docs
+- **API 根路径**: https://heart-rythm-production.up.railway.app/
+- **健康检查**: https://heart-rythm-production.up.railway.app/health/
+
+> ✅ 部署在 Railway 云端，24/7 在线，HTTPS 安全连接
 
 ## 🎉 v2.1 PWA移动端化更新
 
