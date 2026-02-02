@@ -1,5 +1,5 @@
 """
-云端部署启动脚本
+云端部署启动脚本 (Render/Railway)
 启动 FastAPI 后端服务
 """
 

@@ -98,7 +98,7 @@
         "张三",
         "李四"
       ],
-      "points": 300,
+      "points": 400,
       "history": [
         {
           "timestamp": "2025-12-09T16:08:46.199501",
@@ -117,9 +117,88 @@
           "points_change": 100,
           "reason": "完成任务",
           "new_balance": 300
+        },
+        {
+          "timestamp": "2026-01-14T20:27:56.459876",
+          "points_change": 100,
+          "reason": "完成任务",
+          "new_balance": 400
         }
       ],
       "created_time": "2025-12-09T16:08:45.538889"
+    },
+    "Dear": {
+      "couple_id": "Dear",
+      "names": [
+        "方",
+        "王"
+      ],
+      "points": 0,
+      "history": [],
+      "created_time": "2025-12-18T21:08:12.998225"
+    },
+    "test_couple_001": {
+      "couple_id": "test_couple_001",
+      "names": [
+        "张三",
+        "李四"
+      ],
+      "points": 0,
+      "history": [],
+      "created_time": "2026-01-14T20:29:34.217495"
+    },
+    "test_couple_004": {
+      "couple_id": "test_couple_004",
+      "names": [
+        "张三",
+        "李四"
+      ],
+      "points": 0,
+      "history": [],
+      "created_time": "2026-01-14T20:29:34.226040"
+    },
+    "test_couple_002": {
+      "couple_id": "test_couple_002",
+      "names": [
+        "张三",
+        "李四"
+      ],
+      "points": 0,
+      "history": [],
+      "created_time": "2026-01-14T20:29:34.251933"
+    },
+    "test_couple_003": {
+      "couple_id": "test_couple_003",
+      "names": [
+        "张三",
+        "李四"
+      ],
+      "points": 200,
+      "history": [
+        {
+          "timestamp": "2026-01-14T20:29:34.294101",
+          "points_change": 100,
+          "reason": "完成任务",
+          "new_balance": 100
+        },
+        {
+          "timestamp": "2026-01-14T20:29:49.086052",
+          "points_change": 100,
+          "reason": "完成任务",
+          "new_balance": 200
+        }
+      ],
+      "created_time": "2026-01-14T20:29:34.288297"
+    },
+    "demo001": {
+      "couple_id": "demo001",
+      "names": [
+        "小明",
+        "小红"
+      ],
+      "points": 0,
+      "history": [],
+      "created_time": "2026-01-14T20:41:18.688141"
     }
   },
   "rewards": [
@@ -154,6 +233,22 @@
       "stock": 2,
       "description": "短途旅行一次",
       "created_time": "2025-11-18T15:29:20.199955"
+    },
+    {
+      "reward_id": "test_reward_002",
+      "name": "电影票",
+      "points_needed": 50,
+      "stock": 10,
+      "description": "",
+      "created_time": "2026-01-14T20:29:34.231412"
+    },
+    {
+      "reward_id": "test_reward_001",
+      "name": "电影票",
+      "points_needed": 50,
+      "stock": 10,
+      "description": "双人电影票",
+      "created_time": "2026-01-14T20:29:34.244580"
     }
   ],
   "exchange_records": [
@@ -177,7 +272,28 @@
       "reward_id": "reward001",
       "points_used": 50,
       "exchange_time": "2025-12-09T17:25:23.890389"
+    },
+    {
+      "record_id": "EX20260114202756",
+      "couple_id": "test001",
+      "reward_id": "reward001",
+      "points_used": 50,
+      "exchange_time": "2026-01-14T20:27:56.408093"
+    },
+    {
+      "record_id": "EX20260114202934",
+      "couple_id": "test_couple_004",
+      "reward_id": "test_reward_002",
+      "points_used": 50,
+      "exchange_time": "2026-01-14T20:29:34.237327"
+    },
+    {
+      "record_id": "EX20260114202948",
+      "couple_id": "test_couple_004",
+      "reward_id": "test_reward_002",
+      "points_used": 50,
+      "exchange_time": "2026-01-14T20:29:48.999588"
     }
   ],
-  "last_updated": "2025-12-09T17:25:23.994187"
+  "last_updated": "2026-01-14T20:41:18.688185"
 }

@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "heart-rythm",
+  "buildCommand": "pip install -r requirements.txt",
+  "devCommand": "python app.py",
+  "installCommand": "pip install -r requirements.txt",
+  "framework": "python",
+  "env": {
+    "PORT": "8000"
+  }
+}

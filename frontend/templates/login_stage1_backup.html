@@ -1,0 +1,857 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 心动积分系统{% endblock %}
+
+{% block content %}
+<style>
+    /* ==================== 呼吸主题变量 ==================== */
+    :root {
+        --breath-pink-light: #ffe4ec;
+        --breath-pink: #ffb6c9;
+        --breath-pink-deep: #ff8aa8;
+        --breath-rose: #e84a7f;
+        --breath-coral: #ff6b95;
+        --bg-gradient-start: #fff5f8;
+        --bg-gradient-mid: #ffe4ec;
+        --bg-gradient-end: #ffd6e8;
+        --glass-bg: rgba(255, 255, 255, 0.65);
+        --glass-border: rgba(255, 255, 255, 0.8);
+        --text-primary: #4a3f55;
+        --text-secondary: #8a7b95;
+        --shadow-breath: 0 8px 32px rgba(232, 74, 127, 0.12);
+        --shadow-breath-hover: 0 12px 48px rgba(232, 74, 127, 0.2);
+        --breath-easing: cubic-bezier(0.4, 0, 0.2, 1);
+        --breath-duration: 3s;
+    }
+
+    /* ==================== 页面背景 ==================== */
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg,
+            var(--bg-gradient-start) 0%,
+            var(--bg-gradient-mid) 50%,
+            var(--bg-gradient-end) 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    /* ==================== 呼吸背景光晕 ==================== */
+    .breath-glow {
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        filter: blur(120px);
+        opacity: 0.4;
+        animation: breath-pulse var(--breath-duration) ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .breath-glow-1 {
+        background: radial-gradient(circle, var(--breath-pink) 0%, transparent 70%);
+        top: -200px;
+        left: -100px;
+        animation-delay: 0s;
+    }
+
+    .breath-glow-2 {
+        background: radial-gradient(circle, var(--breath-coral) 0%, transparent 70%);
+        bottom: -200px;
+        right: -100px;
+        animation-delay: 1.5s;
+    }
+
+    @keyframes breath-pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.3;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.5;
+        }
+    }
+
+    /* ==================== 漂浮爱心背景 ==================== */
+    .floating-hearts-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .floating-heart {
+        position: absolute;
+        font-size: 20px;
+        opacity: 0.2;
+        animation: float-heart 12s ease-in-out infinite;
+        filter: blur(0.5px);
+    }
+
+    @keyframes float-heart {
+        0% {
+            transform: translateY(100vh) rotate(0deg) scale(1);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.2;
+        }
+        50% {
+            transform: translateY(50vh) rotate(180deg) scale(1.1);
+            opacity: 0.25;
+        }
+        90% {
+            opacity: 0.2;
+        }
+        100% {
+            transform: translateY(-10vh) rotate(360deg) scale(1);
+            opacity: 0;
+        }
+    }
+
+    /* ==================== 主容器 ==================== */
+    .login-wrapper {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 480px;
+        padding: 20px;
+        animation: fade-in-up 0.8s var(--breath-easing);
+    }
+
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ==================== 玻璃拟态卡片 ==================== */
+    .login-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 28px;
+        padding: 48px 40px;
+        box-shadow: var(--shadow-breath);
+        animation: card-breath var(--breath-duration) ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* 卡片内光效 */
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.8),
+            transparent);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.8; }
+    }
+
+    @keyframes card-breath {
+        0%, 100% {
+            box-shadow: var(--shadow-breath);
+            transform: translateY(0);
+        }
+        50% {
+            box-shadow: var(--shadow-breath-hover);
+            transform: translateY(-4px);
+        }
+    }
+
+    .login-card:hover {
+        animation-play-state: paused;
+    }
+
+    /* ==================== 标题区域 ==================== */
+    .login-header {
+        text-align: center;
+        margin-bottom: 36px;
+        animation: heartbeat 2s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        10% { transform: scale(1.05); }
+        20% { transform: scale(1); }
+        30% { transform: scale(1.05); }
+        40% { transform: scale(1); }
+    }
+
+    .login-header .heart-icon {
+        font-size: 52px;
+        display: block;
+        margin-bottom: 16px;
+        animation: heart-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes heart-glow {
+        0%, 100% {
+            filter: drop-shadow(0 0 8px rgba(255, 107, 157, 0.4));
+            transform: scale(1);
+        }
+        50% {
+            filter: drop-shadow(0 0 16px rgba(255, 107, 157, 0.6));
+            transform: scale(1.08);
+        }
+    }
+
+    .login-header h1 {
+        font-size: 1.85rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--breath-rose), var(--breath-coral));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        letter-spacing: 1px;
+    }
+
+    .login-header .subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 8px;
+        font-weight: 400;
+    }
+
+    /* ==================== 表单组 ==================== */
+    .form-group {
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        transition: var(--breath-duration) var(--breath-easing);
+    }
+
+    /* ==================== 呼吸输入框 ==================== */
+    .form-group input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid rgba(255, 182, 201, 0.4);
+        border-radius: 16px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        transition: all 0.4s var(--breath-easing);
+        color: var(--text-primary);
+        outline: none;
+        position: relative;
+    }
+
+    .form-group input::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+
+    /* 输入框聚焦 - 呼吸效果 */
+    .form-group input:focus {
+        border-color: var(--breath-pink-deep);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(255, 138, 168, 0.15),
+                    0 4px 16px rgba(232, 74, 127, 0.1);
+        transform: translateY(-2px);
+        animation: input-breath 2s ease-in-out infinite;
+    }
+
+    @keyframes input-breath {
+        0%, 100% {
+            box-shadow: 0 0 0 4px rgba(255, 138, 168, 0.15),
+                        0 4px 16px rgba(232, 74, 127, 0.1);
+        }
+        50% {
+            box-shadow: 0 0 0 6px rgba(255, 138, 168, 0.2),
+                        0 6px 20px rgba(232, 74, 127, 0.15);
+        }
+    }
+
+    .form-group small {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        opacity: 0.8;
+    }
+
+    /* ==================== 呼吸按钮 ==================== */
+    .btn-breath {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.4s var(--breath-easing);
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg,
+            var(--breath-pink-deep) 0%,
+            var(--breath-rose) 100%);
+        color: white;
+        box-shadow: 0 6px 20px rgba(232, 74, 127, 0.3);
+        animation: button-breath var(--breath-duration) ease-in-out infinite;
+    }
+
+    @keyframes button-breath {
+        0%, 100% {
+            box-shadow: 0 6px 20px rgba(232, 74, 127, 0.3);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 8px 28px rgba(232, 74, 127, 0.4);
+            transform: scale(1.02);
+        }
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 10px 32px rgba(232, 74, 127, 0.45);
+        animation: none;
+    }
+
+    .btn-primary:active {
+        transform: translateY(0) scale(0.98);
+        animation: none;
+    }
+
+    /* 按钮光效 */
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    /* ==================== 辅助链接 ==================== */
+    .form-switch {
+        text-align: center;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 182, 201, 0.3);
+    }
+
+    .form-switch p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .form-switch a {
+        color: var(--breath-rose);
+        text-decoration: none;
+        font-weight: 600;
+        position: relative;
+        transition: all 0.3s var(--breath-easing);
+        display: inline-block;
+    }
+
+    .form-switch a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+            var(--breath-pink-deep),
+            var(--breath-rose));
+        transition: width 0.3s var(--breath-easing);
+    }
+
+    .form-switch a:hover {
+        color: var(--breath-coral);
+        transform: translateY(-1px);
+    }
+
+    .form-switch a:hover::after {
+        width: 100%;
+    }
+
+    /* ==================== 表单切换动画 ==================== */
+    .form-container {
+        transition: all 0.5s var(--breath-easing);
+    }
+
+    .form-container.hidden {
+        opacity: 0;
+        transform: translateX(20px);
+        pointer-events: none;
+        position: absolute;
+    }
+
+    .form-container.active {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* ==================== 提示信息 ==================== */
+    #alertMessage {
+        margin-bottom: 20px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        animation: alert-slide-in 0.4s var(--breath-easing);
+        backdrop-filter: blur(10px);
+    }
+
+    @keyframes alert-slide-in {
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .alert-success {
+        background: rgba(212, 237, 218, 0.85);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+        color: #155724;
+    }
+
+    .alert-error {
+        background: rgba(248, 215, 218, 0.85);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #721c24;
+    }
+
+    .alert-info {
+        background: rgba(206, 231, 250, 0.85);
+        border: 1px solid rgba(23, 162, 184, 0.3);
+        color: #0c5460;
+    }
+
+    /* ==================== 测试账号卡片 ==================== */
+    .test-account-card {
+        margin-top: 24px;
+        padding: 18px 20px;
+        background: rgba(255, 228, 236, 0.4);
+        border: 1px solid rgba(255, 182, 201, 0.4);
+        border-radius: 14px;
+        backdrop-filter: blur(10px);
+        animation: fade-in 0.6s ease 0.3s both;
+    }
+
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .test-account-card h6 {
+        color: var(--text-primary);
+        margin: 0 0 10px 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .test-account-card p {
+        color: var(--text-secondary);
+        margin: 6px 0;
+        font-size: 0.85rem;
+    }
+
+    /* ==================== 响应式设计 ==================== */
+    @media (max-width: 576px) {
+        .login-wrapper {
+            padding: 16px;
+        }
+
+        .login-card {
+            padding: 36px 28px;
+            border-radius: 24px;
+        }
+
+        .login-header .heart-icon {
+            font-size: 42px;
+        }
+
+        .login-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .form-group input {
+            padding: 14px 18px;
+        }
+
+        .btn-breath {
+            padding: 14px;
+        }
+
+        .breath-glow {
+            width: 400px;
+            height: 400px;
+        }
+    }
+
+    /* ==================== 加载状态 ==================== */
+    .btn-breath:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        animation: none;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<!-- 呼吸背景光晕 -->
+<div class="breath-glow breath-glow-1"></div>
+<div class="breath-glow breath-glow-2"></div>
+
+<!-- 漂浮爱心背景容器 -->
+<div class="floating-hearts-container" id="heartsContainer"></div>
+
+<!-- 登录容器 -->
+<div class="login-wrapper">
+    <div class="login-card">
+        <!-- 标题区域 -->
+        <div class="login-header">
+            <span class="heart-icon">💕</span>
+            <h1>心动积分</h1>
+            <p class="subtitle">记录爱的每一刻</p>
+        </div>
+
+        <!-- 提示信息 -->
+        <div id="alertMessage" style="display: none;"></div>
+
+        <!-- 登录表单 -->
+        <div id="loginForm" class="form-container active">
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="loginUsername">用户名</label>
+                    <input type="text"
+                           id="loginUsername"
+                           placeholder="输入你的用户名"
+                           required
+                           autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password"
+                           id="loginPassword"
+                           placeholder="输入你的密码"
+                           required
+                           autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-breath btn-primary">
+                    登录
+                </button>
+            </form>
+
+            <div class="form-switch">
+                <p>还没有账号？ <a href="#" id="showRegister">立即注册</a></p>
+            </div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="registerForm" class="form-container hidden">
+            <form id="registerFormElement">
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text"
+                           id="registerUsername"
+                           placeholder="创建你的用户名"
+                           required
+                           minlength="3"
+                           autocomplete="username">
+                    <small>至少3个字符</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password"
+                           id="registerPassword"
+                           placeholder="创建你的密码"
+                           required
+                           minlength="6"
+                           autocomplete="new-password">
+                    <small>至少6个字符</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerName1">第一个人的名字</label>
+                    <input type="text"
+                           id="registerName1"
+                           placeholder="输入TA的名字"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerName2">第二个人的名字</label>
+                    <input type="text"
+                           id="registerName2"
+                           placeholder="输入TA的名字"
+                           required>
+                </div>
+
+                <button type="submit" class="btn-breath btn-primary">
+                    注册
+                </button>
+            </form>
+
+            <div class="form-switch">
+                <p>已有账号？ <a href="#" id="showLogin">返回登录</a></p>
+            </div>
+        </div>
+
+        <!-- 测试账号提示 -->
+        <div class="test-account-card">
+            <h6>🔑 测试账号</h6>
+            <p><strong>情侣账号：</strong> couple_test001 / 123456</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== 生成漂浮爱心 ====================
+    function createFloatingHearts() {
+        const container = document.getElementById('heartsContainer');
+        const hearts = ['💗', '💕', '💖', '💝', '💘', '💓', '💞', '✨', '🌸'];
+        const heartCount = 15;
+
+        for (let i = 0; i < heartCount; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDelay = Math.random() * 12 + 's';
+            heart.style.animationDuration = (10 + Math.random() * 6) + 's';
+            heart.style.fontSize = (16 + Math.random() * 14) + 'px';
+            container.appendChild(heart);
+        }
+    }
+
+    createFloatingHearts();
+
+    // ==================== 表单切换 ====================
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const alertMessage = document.getElementById('alertMessage');
+
+    document.getElementById('showRegister').addEventListener('click', function(e) {
+        e.preventDefault();
+        loginForm.classList.remove('active');
+        loginForm.classList.add('hidden');
+        setTimeout(() => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            setTimeout(() => {
+                registerForm.classList.remove('hidden');
+                registerForm.classList.add('active');
+            }, 50);
+        }, 300);
+        alertMessage.style.display = 'none';
+        setTimeout(() => document.getElementById('registerUsername').focus(), 400);
+    });
+
+    document.getElementById('showLogin').addEventListener('click', function(e) {
+        e.preventDefault();
+        registerForm.classList.remove('active');
+        registerForm.classList.add('hidden');
+        setTimeout(() => {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            setTimeout(() => {
+                loginForm.classList.remove('hidden');
+                loginForm.classList.add('active');
+            }, 50);
+        }, 300);
+        alertMessage.style.display = 'none';
+        setTimeout(() => document.getElementById('loginUsername').focus(), 400);
+    });
+
+    // ==================== 提示信息 ====================
+    function showAlert(message, type = 'info') {
+        alertMessage.className = `alert-${type}`;
+        alertMessage.textContent = message;
+        alertMessage.style.display = 'block';
+
+        setTimeout(() => {
+            alertMessage.style.opacity = '0';
+            setTimeout(() => {
+                alertMessage.style.display = 'none';
+                alertMessage.style.opacity = '1';
+            }, 400);
+        }, 3500);
+    }
+
+    // ==================== 登录处理 ====================
+    document.getElementById('loginFormElement').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span>登录中...';
+
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.user.username);
+                localStorage.setItem('is_admin', data.user.is_admin);
+
+                if (data.couple) {
+                    localStorage.setItem('couple_id', data.couple.couple_id);
+                    localStorage.setItem('couple_names', JSON.stringify(data.couple.names));
+                }
+
+                showAlert('💕 登录成功！正在跳转...', 'success');
+                setTimeout(() => window.location.href = '/', 1200);
+            } else {
+                showAlert(data.detail || '登录失败', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        } catch (error) {
+            showAlert('网络错误，请稍后重试', 'error');
+            console.error('登录错误:', error);
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+
+    // ==================== 注册处理 ====================
+    document.getElementById('registerFormElement').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span>注册中...';
+
+        const username = document.getElementById('registerUsername').value;
+        const password = document.getElementById('registerPassword').value;
+        const name1 = document.getElementById('registerName1').value;
+        const name2 = document.getElementById('registerName2').value;
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, name1, name2 })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('🎉 注册成功！请登录', 'success');
+
+                setTimeout(() => {
+                    registerForm.classList.remove('active');
+                    registerForm.classList.add('hidden');
+                    setTimeout(() => {
+                        registerForm.style.display = 'none';
+                        loginForm.style.display = 'block';
+                        setTimeout(() => {
+                            loginForm.classList.remove('hidden');
+                            loginForm.classList.add('active');
+                        }, 50);
+                    }, 300);
+
+                    document.getElementById('loginUsername').value = username;
+                    document.getElementById('loginPassword').focus();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }, 1800);
+            } else {
+                showAlert(data.detail || '注册失败', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        } catch (error) {
+            showAlert('网络错误，请稍后重试', 'error');
+            console.error('注册错误:', error);
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+
+    // ==================== 页面初始化 ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('loginUsername').focus();
+
+        if (localStorage.getItem('token')) {
+            showAlert('你已登录，可以继续操作或注册新账号', 'info');
+        }
+    });
+</script>
+{% endblock %}

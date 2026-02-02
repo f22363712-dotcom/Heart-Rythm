@@ -1,7 +1,17 @@
-fastapi
-uvicorn
-gunicorn
-pydantic
-python-multipart
-flask
-requests
+# 心动积分项目依赖
+
+# 后端框架
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+
+# 前端框架
+flask>=3.0.0
+requests>=2.31.0
+
+# 测试框架
+pytest>=7.4.0
+httpx>=0.25.0  # FastAPI 测试客户端需要
+
+# 可选：用于生产部署
+# gunicorn>=21.0.0

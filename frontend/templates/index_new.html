@@ -1,0 +1,476 @@
+{% extends "base_new.html" %}
+
+{% block title %}首页 - 心动积分系统{% endblock %}
+
+{% block content %}
+<style>
+    /* 首页专属样式 */
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 48px;
+        animation: fadeInDown 0.8s ease;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .welcome-section h1 {
+        font-family: 'Ma Shan Zheng', cursive;
+        font-size: 2.8rem;
+        background: linear-gradient(135deg, var(--rose-blush), var(--rose-mauve));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 12px;
+    }
+
+    .welcome-section .tagline {
+        font-size: 1.1rem;
+        color: #8a7b95;
+        font-weight: 400;
+        letter-spacing: 1px;
+    }
+
+    /* 情侣积分卡片 - 主视觉焦点 */
+    .love-score-card {
+        background: linear-gradient(135deg, var(--rose-blush) 0%, var(--rose-mauve) 100%);
+        border-radius: 32px;
+        padding: 48px 40px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 12px 48px rgba(212, 122, 158, 0.25);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+        animation: cardRise 0.8s ease 0.2s both;
+    }
+
+    @keyframes cardRise {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .love-score-card::before {
+        content: '💕';
+        position: absolute;
+        font-size: 180px;
+        opacity: 0.08;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: heartbeat 2s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.05); }
+    }
+
+    .love-score-card .couple-names {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+    }
+
+    .love-score-card .score-display {
+        font-size: 4.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .love-score-card .score-label {
+        font-size: 1rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* 快速操作卡片 - 弱化但可用 */
+    .quick-action-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 32px 28px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        height: 100%;
+        animation: cardRise 0.8s ease 0.4s both;
+    }
+
+    .quick-action-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 32px rgba(212, 122, 158, 0.12);
+    }
+
+    .quick-action-card .icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .quick-action-card h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4a3f55;
+        margin-bottom: 12px;
+    }
+
+    .quick-action-card p {
+        font-size: 0.9rem;
+        color: #8a7b95;
+        margin-bottom: 20px;
+    }
+
+    /* 访客视图 - 简洁邀请 */
+    .guest-invite {
+        text-align: center;
+        padding: 80px 20px;
+        animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .guest-invite .heart-icon {
+        font-size: 80px;
+        display: block;
+        margin-bottom: 24px;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .guest-invite h2 {
+        font-family: 'Ma Shan Zheng', cursive;
+        font-size: 2.2rem;
+        color: #4a3f55;
+        margin-bottom: 16px;
+    }
+
+    .guest-invite .subtitle {
+        font-size: 1.1rem;
+        color: #8a7b95;
+        margin-bottom: 40px;
+        font-style: italic;
+    }
+
+    .guest-invite .cta-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .guest-invite .hint-text {
+        font-size: 0.9rem;
+        color: #a89bb0;
+        margin-top: 0;
+        opacity: 0.7;
+    }
+
+    /* 管理员视图 */
+    .admin-stats-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 32px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        animation: cardRise 0.8s ease 0.3s both;
+    }
+
+    .admin-stats-card .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .admin-stats-card .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--rose-mauve);
+        margin-bottom: 8px;
+    }
+
+    .admin-stats-card .stat-label {
+        font-size: 0.95rem;
+        color: #8a7b95;
+    }
+</style>
+
+<!-- 未登录状态 - 简洁邀请 -->
+<div id="guestView">
+    <div class="guest-invite">
+        <span class="heart-icon">💕</span>
+        <h2>心动积分</h2>
+        <p class="subtitle">"让每个小美好都有回响"</p>
+
+        <!-- 简化为单一入口 -->
+        <div class="cta-buttons">
+            <a href="/login" class="btn btn-primary btn-lg">
+                <i class="bi bi-heart-fill"></i> 登录查看
+            </a>
+        </div>
+
+        <!-- 弱化的说明文字 -->
+        <p class="hint-text">
+            第一次来？可以在登录页注册
+        </p>
+    </div>
+</div>
+
+<!-- 已登录状态 - 普通用户 -->
+<div id="userView" style="display: none;">
+    <!-- 欢迎区域 -->
+    <div class="welcome-section">
+        <h1>
+            <i class="bi bi-heart-fill"></i>
+            <span id="welcomeNames"></span>
+        </h1>
+        <p class="tagline">你们的爱的印记本</p>
+    </div>
+
+    <!-- 积分展示卡片 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="love-score-card">
+                <div class="couple-names">
+                    <span id="coupleNames"></span>
+                </div>
+                <div class="score-display">
+                    <span id="currentPoints">0</span>
+                </div>
+                <div class="score-label">个爱的印记</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快速操作 -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="quick-action-card">
+                <span class="icon">✨</span>
+                <h5>记录美好</h5>
+                <p>盖上新的爱的印记</p>
+                <button class="btn btn-primary" onclick="showAddPointsModal()">
+                    <i class="bi bi-plus-circle"></i> 记录这一刻
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="quick-action-card">
+                <span class="icon">🎁</span>
+                <h5>甜蜜兑换</h5>
+                <p>用印记开启惊喜</p>
+                <a href="/rewards" class="btn btn-success">
+                    <i class="bi bi-gift-fill"></i> 去兑换
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="quick-action-card">
+                <span class="icon">📖</span>
+                <h5>美好时光</h5>
+                <p>回顾你们的足迹</p>
+                <a href="/dashboard" class="btn btn-info">
+                    <i class="bi bi-clock-history"></i> 查看记录
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 已登录状态 - 管理员 -->
+<div id="adminView" style="display: none;">
+    <div class="welcome-section">
+        <h1>
+            <i class="bi bi-shield-fill-check"></i>
+            管理后台
+        </h1>
+        <p class="tagline">系统概览</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="admin-stats-card">
+                <span class="stat-icon">👥</span>
+                <div class="stat-value" id="totalCouples">0</div>
+                <div class="stat-label">情侣总数</div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="admin-stats-card">
+                <span class="stat-icon">💝</span>
+                <div class="stat-value" id="totalPoints">0</div>
+                <div class="stat-label">总印记数</div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="admin-stats-card">
+                <span class="stat-icon">🎉</span>
+                <div class="stat-value" id="totalExchanges">0</div>
+                <div class="stat-label">兑换次数</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <h4 class="mb-4">管理功能</h4>
+                    <a href="/admin" class="btn btn-primary btn-lg">
+                        <i class="bi bi-gear-fill"></i> 进入管理后台
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加积分模态框 -->
+<div class="modal fade" id="addPointsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle"></i> 记录美好时刻
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPointsForm">
+                    <div class="mb-3">
+                        <label for="pointsChange" class="form-label">印记数量</label>
+                        <input type="number" class="form-control" id="pointsChange" required>
+                        <small class="form-text text-muted">正数增加，负数减少</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">这一刻的故事</label>
+                        <input type="text" class="form-control" id="reason" placeholder="写下让你们心动的瞬间..." required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddPoints()">
+                    💕 盖上印记
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let addPointsModalInstance;
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 初始化模态框
+        const modalElement = document.getElementById('addPointsModal');
+        if (modalElement) {
+            addPointsModalInstance = new bootstrap.Modal(modalElement);
+        }
+
+        const token = getToken();
+        const isAdmin = localStorage.getItem('is_admin') === 'true';
+
+        if (!token) {
+            // 未登录，显示访客视图
+            document.getElementById('guestView').style.display = 'block';
+        } else if (isAdmin) {
+            // 管理员视图
+            document.getElementById('adminView').style.display = 'block';
+            await loadAdminStats();
+        } else {
+            // 普通用户视图
+            document.getElementById('userView').style.display = 'block';
+            await loadUserInfo();
+        }
+    });
+
+    // 加载用户信息
+    async function loadUserInfo() {
+        const data = await apiRequest('/auth/me');
+        if (data && data.couple) {
+            const names = `${data.couple.names[0]} & ${data.couple.names[1]}`;
+            document.getElementById('welcomeNames').textContent = names + ' 的小屋';
+            document.getElementById('coupleNames').textContent = names;
+            document.getElementById('currentPoints').textContent = data.couple.points;
+        }
+    }
+
+    // 加载管理员统计
+    async function loadAdminStats() {
+        const data = await apiRequest('/admin/stats');
+        if (data) {
+            document.getElementById('totalCouples').textContent = data.total_couples;
+            document.getElementById('totalPoints').textContent = data.total_points;
+            document.getElementById('totalExchanges').textContent = data.total_exchanges;
+        }
+    }
+
+    // 显示添加积分模态框
+    function showAddPointsModal() {
+        if (addPointsModalInstance) {
+            addPointsModalInstance.show();
+        }
+    }
+
+    // 提交添加积分
+    async function submitAddPoints() {
+        const pointsChange = parseInt(document.getElementById('pointsChange').value);
+        const reason = document.getElementById('reason').value;
+
+        if (!pointsChange || !reason) {
+            showAlert('请填写完整信息', 'warning');
+            return;
+        }
+
+        const data = await apiRequest('/points', {
+            method: 'POST',
+            body: JSON.stringify({
+                points_change: pointsChange,
+                reason: reason
+            })
+        });
+
+        if (data) {
+            showAlert('✨ 又一个美好被记录啦！', 'success');
+            addPointsModalInstance.hide();
+            document.getElementById('addPointsForm').reset();
+            await loadUserInfo();
+        }
+    }
+</script>
+{% endblock %}

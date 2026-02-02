@@ -1,0 +1,276 @@
+{% extends "base_new.html" %}
+
+{% block title %}管理员后台 - 心动积分系统{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>
+            <i class="bi bi-shield-fill-check"></i> 管理员后台
+        </h2>
+        <p class="text-muted">系统管理和数据统计</p>
+    </div>
+</div>
+
+<!-- 系统统计 -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people-fill display-1 text-primary mb-3"></i>
+                <h5 class="card-title text-muted">情侣总数</h5>
+                <h2 class="display-4 text-primary" id="totalCouples">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-coin display-1 text-warning mb-3"></i>
+                <h5 class="card-title text-muted">总积分</h5>
+                <h2 class="display-4 text-warning" id="totalPoints">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-gift-fill display-1 text-success mb-3"></i>
+                <h5 class="card-title text-muted">兑换次数</h5>
+                <h2 class="display-4 text-success" id="totalExchanges">0</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 标签页 -->
+<ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="couples-tab" data-bs-toggle="tab" data-bs-target="#couples" type="button">
+            <i class="bi bi-people-fill"></i> 所有情侣
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="exchanges-tab" data-bs-toggle="tab" data-bs-target="#exchanges" type="button">
+            <i class="bi bi-clock-history"></i> 兑换记录
+        </button>
+    </li>
+</ul>
+
+<!-- 标签页内容 -->
+<div class="tab-content" id="adminTabsContent">
+    <!-- 所有情侣 -->
+    <div class="tab-pane fade show active" id="couples">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-people-fill"></i> 情侣列表
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="couplesList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 兑换记录 -->
+    <div class="tab-pane fade" id="exchanges">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> 全局兑换记录
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="exchangesList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 检查登录状态和管理员权限
+        const isAdmin = localStorage.getItem('is_admin') === 'true';
+        if (!getToken() || !isAdmin) {
+            showAlert('需要管理员权限', 'danger');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+            return;
+        }
+
+        // 加载数据
+        await loadAdminData();
+
+        // 监听标签页切换
+        document.getElementById('exchanges-tab').addEventListener('shown.bs.tab', loadExchanges);
+    });
+
+    // 加载管理员数据
+    async function loadAdminData() {
+        await Promise.all([
+            loadStats(),
+            loadCouples()
+        ]);
+    }
+
+    // 加载统计数据
+    async function loadStats() {
+        const data = await apiRequest('/admin/stats');
+        if (data) {
+            document.getElementById('totalCouples').textContent = data.total_couples;
+            document.getElementById('totalPoints').textContent = data.total_points;
+            document.getElementById('totalExchanges').textContent = data.total_exchanges;
+        }
+    }
+
+    // 加载所有情侣
+    async function loadCouples() {
+        const data = await apiRequest('/couples/all');
+        if (data && data.couples) {
+            displayCouples(data.couples);
+        }
+    }
+
+    // 显示情侣列表
+    function displayCouples(couples) {
+        const listElement = document.getElementById('couplesList');
+
+        if (couples.length === 0) {
+            listElement.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox display-1"></i>
+                    <p class="mt-3">暂无情侣数据</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table table-hover">';
+        html += `
+            <thead class="table-light">
+                <tr>
+                    <th>情侣ID</th>
+                    <th>用户名</th>
+                    <th>名字</th>
+                    <th>积分</th>
+                    <th>创建时间</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        couples.forEach(couple => {
+            const date = new Date(couple.created_time);
+            const dateStr = date.toLocaleDateString('zh-CN');
+
+            html += `
+                <tr>
+                    <td><code>${couple.couple_id}</code></td>
+                    <td><span class="badge bg-info">${couple.username}</span></td>
+                    <td>
+                        <i class="bi bi-heart-fill text-danger"></i>
+                        ${couple.names[0]} & ${couple.names[1]}
+                    </td>
+                    <td>
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-coin"></i> ${couple.points}
+                        </span>
+                    </td>
+                    <td>${dateStr}</td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table></div>';
+        listElement.innerHTML = html;
+    }
+
+    // 加载兑换记录
+    async function loadExchanges() {
+        const data = await apiRequest('/exchanges/all?limit=100');
+        if (data && data.exchanges) {
+            displayExchanges(data.exchanges);
+        }
+    }
+
+    // 显示兑换记录
+    function displayExchanges(exchanges) {
+        const listElement = document.getElementById('exchangesList');
+
+        if (exchanges.length === 0) {
+            listElement.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox display-1"></i>
+                    <p class="mt-3">暂无兑换记录</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table table-hover">';
+        html += `
+            <thead class="table-light">
+                <tr>
+                    <th>兑换时间</th>
+                    <th>情侣</th>
+                    <th>奖励</th>
+                    <th>消耗积分</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        exchanges.forEach(record => {
+            const date = new Date(record.exchange_time);
+            const dateStr = date.toLocaleString('zh-CN');
+
+            html += `
+                <tr>
+                    <td>${dateStr}</td>
+                    <td>
+                        <i class="bi bi-heart-fill text-danger"></i>
+                        ${record.name1 || '?'} & ${record.name2 || '?'}
+                    </td>
+                    <td>
+                        <i class="bi bi-gift-fill text-success"></i>
+                        ${record.reward_name || '未知奖励'}
+                    </td>
+                    <td>
+                        <span class="badge bg-danger">
+                            -${record.points_used}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table></div>';
+        listElement.innerHTML = html;
+    }
+</script>
+
+{% block extra_css %}
+<style>
+    code {
+        color: #d63384;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+{% endblock %}
