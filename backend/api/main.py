@@ -510,11 +510,5 @@ def health_check():
     """健康检查端点"""
     return {"status": "healthy", "message": "💕 心动积分系统 v2.0 运行正常"}
 
-@app.get("/", response_model=dict, status_code=status.HTTP_200_OK)
-def root():
-    """根路径"""
-    return {
-        "message": "欢迎使用心动积分系统 API v2.0",
-        "docs": "/docs",
-        "version": "2.0.0"
-    }
+# 根路径路由已移至 app.py，用于提供前端页面
+# API 信息可通过 /docs 查看
